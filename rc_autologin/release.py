@@ -11,7 +11,7 @@ from pathlib import Path
 
 from rc_autologin import config
 
-VERSION = "1.0.0"
+VERSION = "1.1.0"
 APP_NAME = "RCAutoLogin"
 BUNDLE_ID = "com.rcautologin.gui"
 
