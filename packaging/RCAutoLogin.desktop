@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=RCAutoLogin
+Comment=RingCX web agent automation
+Exec=@ROOT@/launch-gui.sh
+Path=@ROOT@
+Terminal=false
+Categories=Utility;
+StartupNotify=true

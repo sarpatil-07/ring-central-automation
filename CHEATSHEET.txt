@@ -1,0 +1,146 @@
+RingCentralAutoSet — Quick Cheatsheet
+=====================================
+
+Project folder: ~/Projects/Ring_Central_Automation
+App name:       RingCentralAutoSet
+
+Opens a separate MAX Chrome window, connects with your Station ID, and runs
+Available / Lunch / Logout on schedule. Your normal work Chrome is never touched.
+
+
+FIRST-TIME SETUP (once)
+-----------------------
+  cd ~/Projects/Ring_Central_Automation
+  bash setup.sh
+  .venv/bin/python run.py menu
+
+  In menu:
+    8  — confirm Station ID
+    2  — set work start, end, and lunch times
+    i  — install background service (auto-runs on Mac login)
+
+
+DAILY AUTOMATION
+----------------
+  Work start   MAX Chrome opens → OTP if needed → connect + Available
+  Lunch start  Status → Unavailable (Lunch)  [quiet, no focus steal]
+  Lunch end    Status → Available
+  Work end     Logout → browser closes until next work day
+
+
+OPEN THE MENU (most common)
+---------------------------
+  cd ~/Projects/Ring_Central_Automation
+  .venv/bin/python run.py menu
+
+  Or:
+  .venv/bin/python run.py
+
+
+CLI COMMANDS
+------------
+  run.py menu              Interactive menu
+  run.py show              Show current schedule
+  run.py morning           Run work start now (connect + Available)
+  run.py lunch             Set Lunch now
+  run.py lunch-end         Set Available now
+  run.py logout            Logout now
+  run.py schedule          Run scheduler in this terminal (test)
+  run.py install-service   Background auto-start on login
+  run.py uninstall-service Remove background service
+  run.py service-status    Check if background job is running
+  run.py reset-browser     Fix stuck MAX Chrome (keeps login)
+  run.py clear-session     Force OTP next run (wipes saved SSO)
+
+
+MENU SHORTCUTS — Schedule & times
+---------------------------------
+  1   Show schedule
+  2   Set ALL times for today (work + lunch)
+  3   Change work START only
+  4   Change work END only
+  5   Change lunch START only
+  6   Change lunch END only
+  7   Enable / disable lunch break
+  8   Change Station ID
+  9   Change timezone (IST, APAC, EMEA, LATAM, NA, etc.)
+  w   Change work days (Mon–Fri, today only, custom)
+
+
+MENU SHORTCUTS — Leave & pause
+------------------------------
+  p   Pause automation (vacation — no jobs until resumed)
+  u   Resume automation
+  x   Mark TODAY as leave → logout now + skip rest of day
+  c   Clear leave date
+
+
+MENU SHORTCUTS — Browser & service
+----------------------------------
+  r   Reset stuck MAX browser (keeps saved login)
+  k   Clear saved login (OTP required next run)
+  i   Install background service
+  t   Background service status
+  s   Start scheduler in this terminal (manual test)
+  0   Exit
+
+
+ROTATING SHIFTS
+---------------
+  When your shift changes:
+    .venv/bin/python run.py menu  →  2  (enter new times)
+
+  If background service is installed, it picks up changes automatically.
+
+
+LEAVE / HALF-DAY / VACATION
+---------------------------
+  Half day / leave today     Menu  x  (logout + skip rest of today)
+  Multi-day vacation         Menu  p  (pause); return with  u
+  Back to normal             Menu  c  (clear leave) or  u  (resume)
+
+
+TROUBLESHOOTING
+---------------
+  MAX Chrome stuck / profile in use
+    Menu  r   or   run.py reset-browser
+
+  Need OTP login again
+    Menu  k   or   run.py clear-session
+
+  Jobs not running in background
+    Menu  t   → if missing, run  i  (install-service)
+
+  Wrong times ran
+    Menu  2  to update, then  t  to confirm service is running
+
+  Lunch/logout stole focus
+    Quiet mode is on by default (QUIET_STATUS_JOBS=true in .env)
+
+  Background service logs:
+    ~/Projects/Ring_Central_Automation/logs/scheduler.log
+    ~/Projects/Ring_Central_Automation/logs/scheduler.err.log
+
+
+DEFAULT SCHEDULE (.env)
+-----------------------
+  Work days:    Mon–Fri
+  Work start:   09:00  — connect + Available
+  Lunch:        13:00 → 14:00
+  Work end:     18:00  — Logout + close browser
+  Station ID:   from .env (STATION_ID)
+  Timezone:     from .env (TIMEZONE — IST, apac, etc.)
+  Chrome profile: ./chrome-max-profile (separate from work Chrome)
+
+
+IMPORTANT NOTES
+---------------
+  1. OTP only in MAX Chrome — script waits up to 10 min, does not click during SSO.
+  2. One MAX tab — lunch and logout reuse the same tab.
+  3. Mac must be awake at scheduled job times.
+  4. After moving/renaming the project folder, run install-service once.
+
+
+ONE-LINER
+---------
+  cd ~/Projects/Ring_Central_Automation && .venv/bin/python run.py menu

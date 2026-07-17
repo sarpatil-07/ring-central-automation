@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RCAutoLogin</title>
+  <style>
+    :root {
+      --bg: #eef2f7;
+      --surface: #fff;
+      --text: #1a2332;
+      --muted: #5c6b7a;
+      --accent: #0667c2;
+      --accent-soft: #e8f2fc;
+      --accent-hover: #0556a3;
+      --border: #d8e0ea;
+      --ok: #0d7a3f;
+      --ok-bg: #dcf5e7;
+      --warn: #b45309;
+      --warn-bg: #fff4e5;
+      --danger: #b42318;
+      --danger-bg: #fde8e6;
+      --shadow: 0 2px 12px rgba(26, 35, 50, 0.08);
+      --radius: 14px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    /* Header */
+    .topbar {
+      background: linear-gradient(135deg, #1a365d 0%, #0667c2 100%);
+      color: #fff;
+      padding: 16px 20px 0;
+      box-shadow: var(--shadow);
+    }
+    .topbar-inner { max-width: 920px; margin: 0 auto; }
+    .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+    .brand-icon {
+      width: 42px; height: 42px; border-radius: 10px;
+      background: rgba(255,255,255,0.15);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem;
+    }
+    .brand h1 { margin: 0; font-size: 1.25rem; font-weight: 700; }
+    .brand p { margin: 2px 0 0; font-size: 0.82rem; opacity: 0.85; }
+    .status-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+    .pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 5px 12px; border-radius: 999px;
+      font-size: 0.78rem; font-weight: 600;
+      background: rgba(255,255,255,0.15);
+    }
+    .pill.ok { background: var(--ok-bg); color: var(--ok); }
+    .pill.off { background: var(--danger-bg); color: var(--danger); }
+    .pill.warn { background: var(--warn-bg); color: var(--warn); }
+    .pill-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+    .busy-bar {
+      display: none; align-items: center; gap: 8px;
+      padding: 8px 12px; margin-bottom: 10px;
+      background: var(--warn-bg); color: var(--warn);
+      border-radius: 8px; font-size: 0.85rem; font-weight: 500;
+    }
+    .busy-bar.show { display: flex; }
+    .spinner {
+      width: 16px; height: 16px; border: 2px solid var(--warn);
+      border-top-color: transparent; border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Tabs */
+    .tabs {
+      display: flex; gap: 4px; max-width: 920px; margin: 0 auto;
+      padding: 0 20px;
+    }
+    .tab {
+      flex: 1; max-width: 140px;
+      padding: 10px 16px; border: none; cursor: pointer;
+      background: transparent; color: rgba(255,255,255,0.7);
+      font-size: 0.9rem; font-weight: 600;
+      border-radius: 10px 10px 0 0;
+      transition: background 0.15s, color 0.15s;
+    }
+    .tab:hover { color: #fff; background: rgba(255,255,255,0.1); }
+    .tab.active { background: var(--bg); color: var(--accent); }
+
+    /* Main */
+    .main { max-width: 920px; margin: 0 auto; padding: 20px 16px 40px; }
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow);
+    }
+    .card-title {
+      margin: 0 0 14px;
+      font-size: 0.8rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.06em;
+      color: var(--muted);
+    }
+    .card-sub { margin: -8px 0 14px; font-size: 0.85rem; color: var(--muted); }
+
+    /* Quick actions */
+    .actions-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+    }
+    @media (max-width: 700px) {
+      .actions-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 560px) {
+      .actions-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    .action-tile {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 6px; padding: 18px 10px;
+      border: 2px solid var(--border); border-radius: 12px;
+      background: var(--surface); cursor: pointer;
+      font-size: 0.88rem; font-weight: 600; color: var(--text);
+      transition: border-color 0.15s, background 0.15s, transform 0.1s;
+    }
+    .action-tile:hover:not(:disabled) {
+      border-color: var(--accent); background: var(--accent-soft);
+      transform: translateY(-1px);
+    }
+    .action-tile:disabled { opacity: 0.5; cursor: not-allowed; }
+    .action-tile .icon { font-size: 1.6rem; line-height: 1; }
+    .action-tile.danger:hover:not(:disabled) {
+      border-color: var(--danger); background: var(--danger-bg);
+    }
+
+    /* Schedule summary */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 10px;
+    }
+    .summary-item {
+      background: var(--accent-soft);
+      border-radius: 10px;
+      padding: 12px;
+      text-align: center;
+    }
+    .summary-item .label { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+    .summary-item .value { font-size: 1.15rem; font-weight: 700; color: var(--accent); margin-top: 4px; }
+
+    /* Setup steps */
+    .steps { display: flex; gap: 8px; margin-bottom: 16px; }
+    .step {
+      flex: 1; text-align: center; padding: 10px 6px;
+      border-radius: 10px; background: #f0f3f7;
+      font-size: 0.75rem; font-weight: 600; color: var(--muted);
+      border: 2px solid transparent;
+    }
+    .step.done { background: var(--ok-bg); color: var(--ok); border-color: var(--ok); }
+    .step.active { background: var(--accent-soft); color: var(--accent); border-color: var(--accent); }
+    .step-num { display: block; font-size: 1.1rem; margin-bottom: 2px; }
+
+    /* Forms */
+    label { display: block; font-size: 0.82rem; font-weight: 600; color: var(--muted); margin-bottom: 5px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 480px) { .grid { grid-template-columns: 1fr; } }
+    input, select {
+      width: 100%; padding: 10px 12px;
+      border: 1px solid var(--border); border-radius: 10px;
+      font-size: 0.95rem; background: #fff;
+      transition: border-color 0.15s;
+    }
+    input:focus, select:focus {
+      outline: none; border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(6,103,194,0.12);
+    }
+    input:disabled { background: #f0f3f7; }
+    .field { margin-bottom: 12px; }
+    .check { display: flex; align-items: center; gap: 10px; margin: 10px 0; }
+    .check input { width: 18px; height: 18px; accent-color: var(--accent); }
+    .check label { margin: 0; font-weight: 500; color: var(--text); }
+
+    .password-wrap { display: flex; gap: 8px; }
+    .password-wrap input { flex: 1; }
+
+    /* Buttons */
+    .btn {
+      border: none; border-radius: 10px;
+      padding: 10px 18px; font-size: 0.92rem; font-weight: 600;
+      cursor: pointer; transition: background 0.15s, transform 0.1s;
+    }
+    .btn:active:not(:disabled) { transform: scale(0.98); }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover:not(:disabled) { background: var(--accent-hover); }
+    .btn-secondary { background: #e8eef5; color: #1f3a56; }
+    .btn-secondary:hover:not(:disabled) { background: #d9e4f0; }
+    .btn-danger { background: var(--danger); color: #fff; }
+    .btn-danger:hover:not(:disabled) { background: #962d22; }
+    .btn-lg { padding: 12px 24px; font-size: 1rem; width: 100%; }
+    .btn:disabled { opacity: 0.55; cursor: not-allowed; }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .hint { font-size: 0.82rem; color: var(--muted); }
+    .hint-warn { color: var(--warn); font-weight: 500; }
+
+    .info-box {
+      background: var(--accent-soft); border: 1px solid #b8d4f0;
+      border-radius: 10px; padding: 12px 14px;
+      font-size: 0.85rem; color: var(--text);
+    }
+
+    #log {
+      background: #0f1720; color: #c8d4e0;
+      font-family: ui-monospace, Menlo, monospace;
+      font-size: 0.8rem; border-radius: 10px;
+      padding: 14px; min-height: 280px; max-height: 420px;
+      overflow-y: auto; white-space: pre-wrap; line-height: 1.55;
+    }
+
+    .toast {
+      position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+      background: #1f2937; color: #fff;
+      padding: 12px 20px; border-radius: 12px;
+      font-size: 0.9rem; opacity: 0; transition: opacity 0.2s;
+      pointer-events: none; max-width: 90%; text-align: center;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.25); z-index: 100;
+    }
+    .toast.show { opacity: 1; }
+
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+
+    #status { display: none; }
+  </style>
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="brand-icon">📞</div>
+        <div>
+          <h1>RCAutoLogin</h1>
+          <p>RingCX Agent · app.ringcentral.com</p>
+        </div>
+      </div>
+      <div id="busy_bar" class="busy-bar">
+        <div class="spinner"></div>
+        <span id="busy_text">Working… RingCX Chrome may take 1–2 min on first login</span>
+      </div>
+      <div class="status-pills" id="status_pills">
+        <span class="pill off"><span class="pill-dot"></span> Loading…</span>
+      </div>
+      <div id="scheduler_alert" class="busy-bar" style="display:none;background:var(--warn-bg);color:var(--warn);margin-bottom:10px"></div>
+    </div>
+    <nav class="tabs">
+      <button class="tab active" data-tab="today">Today</button>
+      <button class="tab" data-tab="setup">Setup</button>
+      <button class="tab" data-tab="schedule">Schedule</button>
+      <button class="tab" data-tab="log">Log</button>
+    </nav>
+  </header>
+
+  <main class="main">
+
+    <!-- TODAY -->
+    <section id="panel-today" class="panel active">
+      <div class="card">
+        <h2 class="card-title">Quick actions</h2>
+        <p class="card-sub">Tap to run now — Chrome stays open after Login</p>
+        <div class="actions-grid">
+          <button class="action-tile action" data-action="morning" type="button">
+            <span class="icon">🟢</span> Login
+          </button>
+          <button class="action-tile action" data-action="lunch" type="button">
+            <span class="icon">🍽</span> Lunch/Dinner
+          </button>
+          <button class="action-tile action" data-action="break" type="button">
+            <span class="icon">☕</span> Break
+          </button>
+          <button class="action-tile action" data-action="lunch-end" type="button">
+            <span class="icon">↩</span> Back
+          </button>
+          <button class="action-tile action danger" data-action="logout" type="button">
+            <span class="icon">🔴</span> Logout
+          </button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">Today's schedule</h2>
+        <div class="summary-grid" id="schedule_summary">
+          <div class="summary-item"><div class="label">Login</div><div class="value" id="sum_start">—</div></div>
+          <div class="summary-item"><div class="label">Lunch/Dinner</div><div class="value" id="sum_lunch">—</div></div>
+          <div class="summary-item"><div class="label">Logout</div><div class="value" id="sum_end">—</div></div>
+          <div class="summary-item"><div class="label">Days</div><div class="value" id="sum_days" style="font-size:0.85rem">—</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">Background automation</h2>
+        <p class="info-box" id="background_note" style="margin:0 0 14px">Loading…</p>
+        <div class="btn-row">
+          <button id="install_btn" class="btn btn-primary" type="button">▶ Start auto job</button>
+          <button id="uninstall_btn" class="btn btn-secondary" type="button">Stop</button>
+          <button id="pause_btn" class="btn btn-secondary" type="button">Pause</button>
+          <button id="resume_btn" class="btn btn-secondary" type="button">Resume</button>
+        </div>
+        <div class="btn-row" style="margin-top:10px">
+          <button id="leave_btn" class="btn btn-secondary" type="button">Mark leave today</button>
+          <button id="clear_leave_btn" class="btn btn-secondary" type="button">Clear leave</button>
+        </div>
+        <div class="btn-row" style="margin-top:10px">
+          <button id="close_browser_btn" class="btn btn-secondary" type="button">Close RingCX Chrome</button>
+        </div>
+        <p class="hint" style="margin-top:8px">Use after closing Chrome manually — cleans up so the next Login opens fast.</p>
+        <p id="service_status_line" class="hint" style="margin-top:12px"></p>
+      </div>
+    </section>
+
+    <!-- SETUP -->
+    <section id="panel-setup" class="panel">
+      <div class="steps">
+        <div class="step" id="step_login"><span class="step-num">1</span>Login</div>
+        <div class="step" id="step_schedule"><span class="step-num">2</span>Schedule</div>
+        <div class="step" id="step_background"><span class="step-num">3</span>Auto job</div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">Step 1 — Your login (one-time)</h2>
+        <p class="card-sub">Each user enters their own ID and password once. Saved locally on this Mac only.</p>
+        <div class="field">
+          <label for="rcx_login_id">User ID / email</label>
+          <input id="rcx_login_id" type="email" autocomplete="username" placeholder="you@company.com" />
+        </div>
+        <div class="field">
+          <label for="rcx_password">Password</label>
+          <div class="password-wrap">
+            <input id="rcx_password" type="password" autocomplete="new-password" placeholder="••••••••" />
+            <button id="toggle_pw_btn" type="button" class="btn btn-secondary">Show</button>
+          </div>
+        </div>
+        <div class="check">
+          <input id="rcx_auto_login" type="checkbox" checked />
+          <label for="rcx_auto_login">Auto sign-in when not logged in</label>
+        </div>
+        <button id="save_creds_btn" class="btn btn-primary btn-lg" type="button">Save login</button>
+        <p id="creds_hint" class="hint" style="margin-top:10px;text-align:center"></p>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">Step 2 & 3</h2>
+        <p class="card-sub">After saving login, go to <strong>Schedule</strong> tab to set times, then return here or use <strong>Today</strong> tab to click <strong>Start auto job</strong>.</p>
+        <div class="btn-row">
+          <button type="button" class="btn btn-secondary" onclick="showTab('schedule')">Go to Schedule →</button>
+          <button type="button" class="btn btn-primary" onclick="showTab('today')">Start auto job →</button>
+        </div>
+      </div>
+
+      <ol class="setup-list" id="setup_steps" style="display:none">
+        <li id="step_login_old"></li>
+        <li id="step_schedule_old"></li>
+        <li id="step_background_old"></li>
+      </ol>
+    </section>
+
+    <!-- SCHEDULE -->
+    <section id="panel-schedule" class="panel">
+      <div class="card">
+        <h2 class="card-title">Work hours</h2>
+        <div class="grid">
+          <div class="field">
+            <label for="work_start">Work start (login)</label>
+            <input id="work_start" type="time" />
+          </div>
+          <div class="field">
+            <label for="work_end">Work end (logout)</label>
+            <input id="work_end" type="time" />
+          </div>
+        </div>
+        <div class="check">
+          <input id="lunch_enabled" type="checkbox" />
+          <label for="lunch_enabled">Lunch/Dinner break</label>
+        </div>
+        <div class="grid">
+          <div class="field">
+            <label for="lunch_start">Lunch/Dinner start</label>
+            <input id="lunch_start" type="time" />
+          </div>
+          <div class="field">
+            <label for="lunch_end">Lunch/Dinner end</label>
+            <input id="lunch_end" type="time" />
+          </div>
+        </div>
+        <div class="two-col">
+          <div class="field">
+            <label for="timezone">Timezone</label>
+            <select id="timezone"></select>
+          </div>
+          <div class="field">
+            <label for="work_days">Work days</label>
+            <select id="work_days">
+              <option>Mon–Fri</option>
+              <option>Mon–Sat</option>
+              <option>Every day</option>
+              <option>Today only</option>
+            </select>
+          </div>
+        </div>
+        <button id="save_btn" class="btn btn-primary btn-lg" type="button">Save schedule</button>
+        <p id="save_hint" class="hint hint-warn" style="margin-top:8px;text-align:center"></p>
+        <p class="hint" style="margin-top:6px;text-align:center">
+          Scheduler starts automatically when you save.
+          Set times 2–3 minutes ahead of now to test.
+          On weekends, set Work days to <strong>Every day</strong> or <strong>Today only</strong>.
+        </p>
+      </div>
+    </section>
+
+    <!-- LOG -->
+    <section id="panel-log" class="panel">
+      <div class="card">
+        <h2 class="card-title">Activity log</h2>
+        <div id="log"></div>
+      </div>
+    </section>
+
+    <div id="status"></div>
+  </main>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    let scheduleEditing = false;
+    let credsEditing = false;
+    let timezoneOptionsReady = false;
+    let cachedTimezoneOptions = [];
+
+    function showTab(name) {
+      document.querySelectorAll(".tab").forEach((t) => {
+        t.classList.toggle("active", t.dataset.tab === name);
+      });
+      document.querySelectorAll(".panel").forEach((p) => {
+        p.classList.toggle("active", p.id === `panel-${name}`);
+      });
+    }
+    document.querySelectorAll(".tab").forEach((t) => {
+      t.addEventListener("click", () => showTab(t.dataset.tab));
+    });
+
+    const toast = (msg) => {
+      const el = $("toast");
+      el.textContent = msg;
+      el.classList.add("show");
+      setTimeout(() => el.classList.remove("show"), 2800);
+    };
+
+    function markScheduleEditing() {
+      scheduleEditing = true;
+      $("save_hint").textContent = "Unsaved changes — click Save schedule";
+    }
+    function clearScheduleEditing() {
+      scheduleEditing = false;
+      $("save_hint").textContent = "";
+    }
+
+    ["work_start", "work_end", "lunch_start", "lunch_end", "lunch_enabled", "work_days", "timezone"].forEach((id) => {
+      const el = $(id);
+      if (!el) return;
+      el.addEventListener("focus", markScheduleEditing);
+      el.addEventListener("input", markScheduleEditing);
+      el.addEventListener("change", markScheduleEditing);
+    });
+
+    function markCredsEditing() {
+      credsEditing = true;
+      $("creds_hint").textContent = "Unsaved — click Save login";
+    }
+    ["rcx_login_id", "rcx_password", "rcx_auto_login"].forEach((id) => {
+      const el = $(id);
+      if (!el) return;
+      el.addEventListener("focus", markCredsEditing);
+      el.addEventListener("input", markCredsEditing);
+      el.addEventListener("change", markCredsEditing);
+    });
+
+    function toInputTime(hhmm) {
+      if (!hhmm || !hhmm.includes(":")) return "";
+      const [h, m] = hhmm.split(":");
+      return `${h.padStart(2, "0")}:${m.padStart(2, "0")}`;
+    }
+    function fromInputTime(val) {
+      if (!val) return "";
+      const [h, m] = val.split(":");
+      return `${parseInt(h, 10)}:${m}`;
+    }
+    function setLunchFields(enabled) {
+      $("lunch_start").disabled = !enabled;
+      $("lunch_end").disabled = !enabled;
+    }
+
+    function fillTimezoneOptions(s) {
+      const sel = $("timezone");
+      const options = (s.timezone_options && s.timezone_options.length)
+        ? s.timezone_options
+        : cachedTimezoneOptions;
+      const current = s.timezone_key || "";
+      if (!timezoneOptionsReady) {
+        sel.innerHTML = "";
+        const seen = new Set();
+        for (const opt of options) {
+          if (seen.has(opt.value)) continue;
+          seen.add(opt.value);
+          const el = document.createElement("option");
+          el.value = opt.value;
+          el.textContent = opt.label;
+          sel.appendChild(el);
+        }
+        if (current && !seen.has(current)) {
+          const el = document.createElement("option");
+          el.value = current;
+          el.textContent = current;
+          sel.appendChild(el);
+        }
+        timezoneOptionsReady = true;
+      }
+      if (!scheduleEditing) {
+        sel.value = current || sel.options[0]?.value || "";
+      }
+    }
+
+    function applySetupSteps(s) {
+      const steps = [
+        { id: "step_login", done: s.login_configured },
+        { id: "step_schedule", done: true },
+        { id: "step_background", done: s.service_running || s.scheduler_running },
+      ];
+      let firstPending = true;
+      steps.forEach(({ id, done }) => {
+        const el = $(id);
+        if (!el) return;
+        el.className = "step" + (done ? " done" : firstPending ? " active" : "");
+        if (!done && firstPending) firstPending = false;
+      });
+      $("background_note").textContent = s.background_note || "";
+      $("service_status_line").textContent = (s.service_running || s.scheduler_running)
+        ? "✓ Scheduler running — safe to close this tab; jobs continue in the background."
+        : "Scheduler stopped — click Start auto job to enable scheduled runs.";
+    }
+
+    function applyStatusBanner(s) {
+      const pills = [];
+      pills.push(s.service_running || s.scheduler_running
+        ? '<span class="pill ok"><span class="pill-dot"></span> Scheduler ON</span>'
+        : '<span class="pill off"><span class="pill-dot"></span> Scheduler OFF</span>');
+      if (!s.scheduler_today_active) {
+        pills.push('<span class="pill warn"><span class="pill-dot"></span> Not a work day</span>');
+      }
+      if (s.paused) pills.push('<span class="pill warn"><span class="pill-dot"></span> Paused</span>');
+      if (s.leave_date) pills.push(`<span class="pill warn">Leave ${s.leave_date}</span>`);
+      if (s.login_configured) pills.push('<span class="pill ok">Login saved</span>');
+      pills.push(`<span class="pill">${s.timezone.split("(")[0].trim()}</span>`);
+      $("status_pills").innerHTML = pills.join("");
+
+      const alertEl = $("scheduler_alert");
+      if (s.scheduler_note) {
+        alertEl.textContent = "⚠ " + s.scheduler_note;
+        alertEl.style.display = "flex";
+      } else if (s.scheduler_running && s.scheduler_upcoming && s.scheduler_upcoming.length) {
+        alertEl.textContent = "Next today: " + s.scheduler_upcoming.join(", ");
+        alertEl.style.display = "flex";
+        alertEl.style.background = "var(--ok-bg)";
+        alertEl.style.color = "var(--ok)";
+      } else {
+        alertEl.style.display = "none";
+      }
+
+      $("sum_start").textContent = s.work_start || "—";
+      $("sum_end").textContent = s.work_end || "—";
+      $("sum_lunch").textContent = s.lunch_enabled
+        ? `${s.lunch_start}–${s.lunch_end}` : "Off";
+      $("sum_days").textContent = (s.work_days || "").replace("Monday – Friday", "Mon–Fri").replace("Every day (Mon–Sun)", "Daily");
+
+      $("busy_bar").classList.toggle("show", !!s.busy);
+      if (s.busy && s.busy_message) {
+        $("busy_text").textContent = s.busy_message;
+      } else if (!s.busy) {
+        $("busy_text").textContent = "";
+      }
+      const disabled = !!s.busy;
+      document.querySelectorAll(".action, #install_btn, #uninstall_btn, #close_browser_btn").forEach((b) => {
+        b.disabled = disabled;
+      });
+
+      fillTimezoneOptions(s);
+      applySetupSteps(s);
+    }
+
+    function applyScheduleForm(s) {
+      $("work_start").value = toInputTime(s.work_start);
+      $("work_end").value = toInputTime(s.work_end);
+      $("lunch_start").value = toInputTime(s.lunch_start);
+      $("lunch_end").value = toInputTime(s.lunch_end);
+      $("lunch_enabled").checked = !!s.lunch_enabled;
+      $("work_days").value = s.work_days_key || "Mon–Fri";
+      setLunchFields(!!s.lunch_enabled);
+    }
+
+    function applyCredentialsForm(s) {
+      $("rcx_login_id").value = s.rcx_login_id || "";
+      $("rcx_auto_login").checked = !!s.rcx_auto_login;
+      if (!credsEditing) {
+        $("rcx_password").value = "";
+        $("rcx_password").placeholder = s.rcx_password_set
+          ? "•••••••• saved — enter only to change"
+          : "Enter password";
+      }
+      const credNote = s.login_configured
+        ? `✓ Saved for ${s.rcx_login_id}`
+        : "Enter your RingCentral email and password";
+      $("creds_hint").textContent = credsEditing ? $("creds_hint").textContent : credNote;
+    }
+
+    function applyStatus(s) {
+      applyStatusBanner(s);
+      if (!scheduleEditing) applyScheduleForm(s);
+      if (!credsEditing) applyCredentialsForm(s);
+    }
+
+    async function refresh() {
+      try {
+        const res = await fetch("/api/state");
+        const data = await res.json();
+        const status = data.status || data;
+        const lines = data.lines || [];
+        applyStatus(status);
+        $("log").textContent = lines.join("\n") || "No activity yet.";
+        $("log").scrollTop = $("log").scrollHeight;
+        scheduleRefresh(status.busy ? 2000 : 5000);
+      } catch (e) {
+        $("status_pills").innerHTML = '<span class="pill off">Server disconnected</span>';
+        scheduleRefresh(4000);
+      }
+    }
+
+    function scheduleRefresh(ms) {
+      if (refreshTimer) clearTimeout(refreshTimer);
+      refreshTimer = setTimeout(refresh, ms);
+    }
+
+    let refreshTimer = null;
+
+    async function post(path, body) {
+      const res = await fetch(path, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body || {}),
+      });
+      const data = await res.json();
+      if (!data.ok) {
+        const err = data.error || data.message || "Request failed";
+        toast("✗ " + err);
+        if (path === "/api/schedule" || path === "/api/credentials") alert(err);
+      } else if (data.message) {
+        toast("✓ " + data.message.split("\n")[0]);
+      }
+      if (data.ok && path === "/api/schedule") clearScheduleEditing();
+      if (data.ok && path === "/api/credentials") {
+        credsEditing = false;
+        $("rcx_password").value = "";
+      }
+      await refresh();
+      return data;
+    }
+
+    $("lunch_enabled").addEventListener("change", (e) => setLunchFields(e.target.checked));
+    $("toggle_pw_btn").addEventListener("click", () => {
+      const pw = $("rcx_password");
+      const hidden = pw.type === "password";
+      pw.type = hidden ? "text" : "password";
+      $("toggle_pw_btn").textContent = hidden ? "Hide" : "Show";
+    });
+
+    $("save_btn").addEventListener("click", () => {
+      const payload = {
+        work_start: fromInputTime($("work_start").value),
+        work_end: fromInputTime($("work_end").value),
+        lunch_enabled: $("lunch_enabled").checked,
+        lunch_start: fromInputTime($("lunch_start").value),
+        lunch_end: fromInputTime($("lunch_end").value),
+        work_days_key: $("work_days").value,
+        timezone: $("timezone").value,
+      };
+      if (!payload.work_start || !payload.work_end) {
+        alert("Work start and work end are required.");
+        return;
+      }
+      if (payload.lunch_enabled && (!payload.lunch_start || !payload.lunch_end)) {
+        alert("Lunch times required when lunch is enabled.");
+        return;
+      }
+      post("/api/schedule", payload);
+    });
+
+    $("save_creds_btn").addEventListener("click", () => {
+      post("/api/credentials", {
+        login_id: $("rcx_login_id").value.trim(),
+        password: $("rcx_password").value,
+        auto_login: $("rcx_auto_login").checked,
+      });
+    });
+
+    document.querySelectorAll(".action").forEach((btn) => {
+      btn.addEventListener("click", () => post("/api/action", { action: btn.dataset.action }));
+    });
+
+    $("install_btn").addEventListener("click", () => post("/api/service", { op: "install" }));
+    $("uninstall_btn").addEventListener("click", () => post("/api/service", { op: "uninstall" }));
+    $("close_browser_btn").addEventListener("click", () => post("/api/browser", { op: "close" }));
+    $("pause_btn").addEventListener("click", () => post("/api/automation", { op: "pause" }));
+    $("resume_btn").addEventListener("click", () => post("/api/automation", { op: "resume" }));
+    $("leave_btn").addEventListener("click", () => {
+      if (confirm("Mark today as leave and logout now?")) {
+        post("/api/automation", { op: "leave" });
+      }
+    });
+    $("clear_leave_btn").addEventListener("click", () => post("/api/automation", { op: "clear_leave" }));
+
+    async function initApp() {
+      try {
+        const tzRes = await fetch("/api/timezones");
+        const tzData = await tzRes.json();
+        cachedTimezoneOptions = tzData.options || [];
+      } catch (_) { /* ignore */ }
+      refresh();
+    }
+
+    initApp();
+  </script>
+</body>
+</html>

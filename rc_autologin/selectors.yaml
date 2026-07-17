@@ -1,0 +1,55 @@
+# RingCX web UI — stable data-test-automation-id selectors
+
+login_sign_in:
+  css: '[data-test-automation-id="login-enter"]'
+
+login_credential:
+  css: 'input#credential[name="credential"]'
+
+login_credential_next:
+  css: '[data-test-automation-id="loginCredentialNext"], button[data-test-automation-id="loginCredentialNext"], input[data-test-automation-id="loginCredentialNext"]'
+
+login_password:
+  css: 'input#password[name="Password"]'
+
+login_stay_signed_in:
+  css: 'input[name="autoLogin"][data-test-automation-id="input"]'
+
+login_sign_in_submit:
+  css: '[data-test-automation-id="signInBtn"]'
+
+agent_tab:
+  css: '[data-test-automation-id="rcxAgent"]'
+
+presence_pill:
+  css: '[data-test-automation-id="rcx-presence-pill"]'
+
+presence_menu:
+  css: '[data-test-automation-id="rcx-presence-menu"]'
+
+start_session:
+  css: '[data-test-automation-id="rcx-presence-pill"][connectstate="disconnected"]'
+
+connected_pill:
+  css: '[data-test-automation-id="rcx-presence-pill"][connectstate="connected"]'
+
+# Fallback when connectstate attribute is missing/changed in newer RingCX UI
+presence_start_session:
+  css: '[data-test-automation-id="rcx-presence-menu-item-start-session"], [data-test-automation-id*="start-session"], button:has-text("Start session")'
+
+available_label:
+  css: 'p.rcx-pill-label[title="AVAILABLE"]'
+
+available_menu:
+  css: '[data-test-automation-id="rcx-presence-menu-item-AVAILABLE"]'
+
+lunch_menu:
+  css: '[data-test-automation-id="rcx-presence-menu-item-LUNCH"]'
+
+break_menu:
+  css: '[data-test-automation-id="rcx-presence-menu-item-ON-BREAK"], [aria-label*="ON-BREAK"]'
+  xpath: '//div[contains(@aria-label, "ON-BREAK")]'
+  text: ON-BREAK
+
+stop_session:
+  css: '[data-test-automation-id="rcx-presence-menu-item-stop-session"]'

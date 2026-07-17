@@ -1,0 +1,295 @@
+================================================================================
+  RCAutoLogin — LIVE DEMO SCRIPT (Presenter)
+  Duration: 15–20 minutes + Q&A
+  Use with: RCAutoLogin_Team_Demo.pptx + live GUI demo
+================================================================================
+
+BEFORE YOU START — CHECKLIST
+----------------------------
+[ ] PowerPoint open (RCAutoLogin_Team_Demo.pptx)
+[ ] GUI server running:  .venv/bin/python rc_autologin_run.py
+[ ] Browser at http://127.0.0.1:8765/  (Cmd+Shift+R if old UI)
+[ ] RingCX test account ready
+[ ] Work Chrome minimized (audience sees RingCX window clearly)
+[ ] Optional: sample zip built in dist/ to show sharing
+[ ] Paste screenshots on slides 13–15 if not doing full live login
+
+
+SLIDE MAP (19 slides)
+---------------------
+  1  Title
+  2  The Problem
+  3  The Solution
+  4  What It Does NOT Do
+  5  Example Daily Schedule
+  6  Architecture diagram
+  7  One-time setup flow
+  8  Daily automation flow
+  9  Work Chrome vs RingCX Chrome
+ 10  Web GUI — four tabs
+ 11  Section: Live Demo & Screenshots
+ 12  Screenshot — TODAY tab
+ 13  Screenshot — SETUP tab
+ 14  Screenshot — RingCX Chrome
+ 15  Share zip with team
+ 16  Launch GUI — Mac vs Linux
+ 17  Live demo script summary
+ 18  Questions?
+
+
+================================================================================
+SECTION 1 — INTRO (2 min) | Slides 1–2
+================================================================================
+
+SAY:
+  "Today I'll show RCAutoLogin — a small local tool that automates our
+   RingCX web agent daily routine: login, lunch, and logout on a schedule."
+
+  "It runs on YOUR laptop only. It does not touch our work Chrome.
+   It uses a separate Chrome profile just for RingCX."
+
+POINT OUT:
+  • Problem slide — agents repeat same clicks every shift
+  • Forgetting login/logout, mixing browsers
+
+
+================================================================================
+SECTION 2 — WHAT IT DOES (3 min) | Slides 3–5
+================================================================================
+
+SAY (slide 3):
+  "At work start the tool opens RingCX, signs in if needed, goes to the
+   Agent tab, starts the session, and sets AVAILABLE."
+
+  "At lunch it sets LUNCH. After lunch, AVAILABLE again.
+   At end of day it stops the session and closes the RingCX browser."
+
+  "Control panel is a simple web GUI with four tabs.
+   After one-time setup, a background job runs daily — even if you close the GUI."
+
+SHOW slide 5 — example schedule table:
+  "Times are fully configurable — this is just an example."
+
+SLIDE 4 — What it does NOT do (important, be honest):
+  "This is browser automation on your machine — not an IT API integration."
+  "If your org uses MFA, you may need to approve once — the tool waits."
+  "You need a visible desktop — this is not for headless servers."
+  "Optional: you can save login once in the GUI for auto sign-in —
+   password stays in local .env on your machine only, never in the zip."
+
+
+================================================================================
+SECTION 3 — ARCHITECTURE (3 min) | Slides 6–9
+================================================================================
+
+SAY (slide 6 — point to architecture diagram):
+  "Three parts on your computer:"
+
+  1. "Web GUI — control panel in your browser at localhost:8765"
+  2. "Background scheduler — runs daily jobs even if GUI is closed"
+  3. "RingCX Chrome — separate profile, separate window"
+
+  "Python and Playwright click the RingCX web UI — same buttons you click manually."
+
+SHOW slide 7 — one-time setup flow:
+  "Each user: SETUP tab save login → SCHEDULE tab set times → TODAY tab Start auto job.
+   Done once. GUI can be closed after that."
+
+SHOW slide 8 — daily flow:
+  "Work start → Login → AVAILABLE. Lunch → LUNCH. After lunch → AVAILABLE.
+   End of day → stop session and close browser."
+
+SLIDE 9 — Separate Chrome table:
+  "Your email Chrome is never automated. Only the chrome-rcx-profile folder."
+
+
+================================================================================
+SECTION 4 — GUI WALKTHROUGH (2 min) | Slide 10
+================================================================================
+
+SAY:
+  "The GUI has four tabs — easy daily use:"
+
+  TODAY    — "Big buttons: Login, Lunch, Back, Logout. Start auto job here."
+  SETUP    — "One-time: save your RingCentral email and password."
+  SCHEDULE — "Work start, end, lunch times."
+  LOG      — "See what ran and any errors."
+
+  "After one-time setup you mostly ignore the GUI — background job handles it."
+
+
+================================================================================
+SECTION 5 — LIVE DEMO (8 min) | Slides 12–14 + GUI
+================================================================================
+
+--- 5A. Open GUI (30 sec) ---
+
+DO:
+  Show browser at http://127.0.0.1:8765/
+  Point to header status pills: Auto job ON/OFF, timezone
+
+SAY:
+  "This is the control panel. It runs locally — nothing goes to the cloud."
+
+
+--- 5B. Setup tab — login one-time (1 min) ---
+
+DO:
+  Click SETUP tab
+  Show step 1-2-3 progress bar
+  Show email field and hidden password with Show/Hide
+
+SAY:
+  "Each agent enters their own login once. Saved in .env on their laptop only.
+   We never put passwords in the shared zip file."
+
+  (If already saved, show green check / 'Login saved' pill)
+
+
+--- 5C. Schedule tab (1 min) ---
+
+DO:
+  Click SCHEDULE tab
+  Show work start, work end, lunch times, timezone
+  Click Save schedule (or show already saved times)
+
+SAY:
+  "Set your shift times once. Lunch must be between work start and end."
+
+
+--- 5D. Login live (3 min) ---
+
+DO:
+  Click TODAY tab
+  Click LOGIN button
+  Show RingCX Chrome opening (separate window)
+  Point to: sign-in (auto if credentials saved) → Agent tab → AVAILABLE
+
+SAY:
+  "Login runs the full morning flow. Chrome STAYS OPEN after login —
+   only Logout at end of day closes it."
+
+  "If MFA appears, complete it once in this window."
+
+WAIT for AVAILABLE or show already available state.
+
+
+--- 5E. Optional quick actions (1 min) ---
+
+DO (if time and session active):
+  Click Lunch → show status change
+  Click Back → show AVAILABLE again
+
+SAY:
+  "Same buttons the scheduler uses at your configured times."
+
+
+--- 5F. Start auto job (1 min) ---
+
+DO:
+  On TODAY tab, show "Start auto job" (or show already ON)
+  Point to info box: runs even if you close this tab
+
+SAY:
+  "Click Start auto job ONCE. After this, daily login/lunch/logout runs
+   automatically — you can close this browser tab and forget about it."
+
+  "Scheduler survives Mac restart — LaunchAgent on Mac, systemd on Linux."
+
+
+--- 5G. Log tab (30 sec) ---
+
+DO:
+  Click LOG tab — show activity lines
+
+SAY:
+  "If something fails, check here or logs/rc-autologin-scheduler.log"
+
+
+================================================================================
+SECTION 6 — SHARING WITH TEAM (2 min) | Slides 15–16
+================================================================================
+
+SAY:
+  "To give this to another agent, we build a zip — not copy the whole folder."
+
+SHOW command (or sample zip):
+  .venv/bin/python rc_autologin_run.py build-release
+
+  "Output: dist/RCAutoLogin-1.0.0-portable.zip"
+
+  "The zip EXCLUDES .env, passwords, and chrome profile.
+   Each user runs install.sh once and sets up their own login."
+
+SLIDE 15 — Same steps for everyone after unzip:
+  1. Unzip
+  2. cd RCAutoLogin-1.0.0-portable
+  3. ./install.sh          ← Mac AND Linux (same script)
+  4. Setup → Schedule → Start auto job (in GUI)
+
+SLIDE 16 — Launch GUI differs by OS:
+
+  MAC users:
+    • Double-click "Launch RCAutoLogin.command"
+    • OR open RCAutoLogin.app (optional Dock shortcut)
+    • Browser opens http://127.0.0.1:8765/
+
+  LINUX users:
+    • Terminal: ./launch-gui.sh
+    • OR use rcautologin.desktop from app menu (created by install.sh)
+    • Same browser URL: http://127.0.0.1:8765/
+
+  BOTH need: Python 3.11–3.13, Google Chrome (or Chromium on Linux)
+
+  "Full steps in RCAutoLogin_COMPLETE_GUIDE.txt inside the zip."
+
+
+================================================================================
+SECTION 7 — Q&A (5 min) | Slide 18
+================================================================================
+
+COMMON QUESTIONS — Suggested answers:
+
+Q: Is my password stored?
+A: Only if you choose auto sign-in in Setup tab. Stored locally in .env
+   on your machine. Never in the shared zip.
+
+Q: Does it work if I close the GUI?
+A: Yes, after Start auto job. GUI is optional control panel.
+
+Q: Mac only?
+A: Mac and Linux. Both need desktop + Chrome.
+
+Q: Will it click during my work in Chrome?
+A: No. Separate Chrome profile and window.
+
+Q: What if RingCX UI changes?
+A: We update selectors in rc_autologin/selectors.yaml.
+
+Q: Can IT deploy centrally?
+A: Share the zip; each user runs install.sh locally. No central server.
+
+
+CLOSING LINE:
+  "RCAutoLogin saves repetitive RingCX clicks, keeps work Chrome separate,
+   and runs on your schedule in the background. Questions?"
+
+
+================================================================================
+TIMING SUMMARY
+================================================================================
+
+  Intro & problem       2 min
+  What it does          3 min
+  Architecture          3 min
+  GUI overview          2 min
+  Live demo             8 min
+  Sharing zip           2 min
+  Q&A                   5 min
+  -------------------------
+  Total                ~25 min
+
+
+================================================================================
+  End of Demo Script — see RCAutoLogin_COMPLETE_GUIDE.txt for install details
+================================================================================

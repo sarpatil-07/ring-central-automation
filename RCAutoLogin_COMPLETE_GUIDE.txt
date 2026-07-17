@@ -1,0 +1,307 @@
+================================================================================
+  RCAutoLogin — COMPLETE GUIDE (Build, Share, Install, Daily Use)
+  RingCX web agent · app.ringcentral.com
+================================================================================
+
+TABLE OF CONTENTS
+-----------------
+  1. What is RCAutoLogin?
+  2. One-time setup (each user)
+  3. Daily use
+  4. Build zip bundle (for IT / team lead)
+  5. What is INCLUDED in the zip
+  6. What is EXCLUDED (never share)
+  7. End-user install steps (Mac & Linux)
+  8. GUI tabs explained
+  9. Background automation
+ 10. Troubleshooting
+ 11. Quick command reference
+
+
+================================================================================
+1. WHAT IS RCAutoLogin?
+================================================================================
+
+RCAutoLogin automates the RingCX web agent daily routine:
+
+  Work start  → Login → Agent tab → Start session → AVAILABLE
+  Lunch       → Set LUNCH status
+  After lunch → Set AVAILABLE
+  Work end    → Stop session → close browser
+
+  • Runs on YOUR computer only (not cloud)
+  • Uses a SEPARATE Chrome window (not your work Chrome)
+  • Control panel: web GUI at http://127.0.0.1:8765/
+  • Works on Mac and Linux (desktop + Google Chrome required)
+
+
+================================================================================
+2. ONE-TIME SETUP (EACH USER — DO ONCE)
+================================================================================
+
+After install.sh, open the GUI and complete 3 steps:
+
+  Step 1 — SETUP tab
+    • Enter your RingCentral email (User ID)
+    • Enter password (hidden field, Show/Hide button)
+    • Check "Auto sign-in when not logged in"
+    • Click "Save login"
+    • Saved locally in .env on YOUR machine only
+
+  Step 2 — SCHEDULE tab
+    • Work start (login time)
+    • Work end (logout time)
+    • Lunch start / end (optional)
+    • Timezone and work days
+    • Click "Save schedule"
+
+  Step 3 — TODAY tab
+    • Click "Start auto job"
+    • Status shows "Auto job ON"
+
+After step 3 you can CLOSE the browser tab and GUI terminal.
+Daily jobs still run on schedule in the background.
+
+
+================================================================================
+3. DAILY USE
+================================================================================
+
+  Automatic (recommended):
+    • Background job runs login / lunch / logout at saved times
+    • No need to open GUI every day
+
+  Manual (optional):
+    • Open GUI → TODAY tab
+    • Login | Lunch | Back | Logout buttons
+    • Chrome stays open after Login (only Logout closes browser)
+
+  Pause / leave:
+    • TODAY tab → Pause or Mark leave today
+
+
+================================================================================
+4. BUILD ZIP BUNDLE (FOR IT / TEAM LEAD)
+================================================================================
+
+Prerequisites (builder machine):
+  cd ~/Projects/Ring_Central_Automation
+  bash setup.sh
+
+Build shareable zip:
+  cd ~/Projects/Ring_Central_Automation
+  .venv/bin/python rc_autologin_run.py build-release
+
+  OR:
+  ./scripts/build_zip.sh
+
+Output file:
+  dist/RCAutoLogin-1.0.0-portable.zip
+
+Send ONLY this zip file to users (Drive, Slack, email, etc.)
+
+IMPORTANT:
+  • Do NOT zip the project folder by hand
+  • Do NOT include your .env or chrome-rcx-profile
+  • Always use build-release command
+
+Verify zip (optional):
+  unzip -l dist/RCAutoLogin-1.0.0-portable.zip | grep -E '\.env|chrome-rcx'
+  (Should return nothing)
+
+
+================================================================================
+5. WHAT IS INCLUDED IN THE ZIP
+================================================================================
+
+  rc_autologin/              App code + GUI + automation
+  rc_autologin_run.py        Main entry point
+  config.py                  Shared settings
+  requirements.txt           Python dependencies
+  install.sh                 First-time user setup
+  launch-gui.sh              Start GUI (Linux)
+  Launch RCAutoLogin.command Mac double-click launcher
+  RCAutoLogin.app            Mac Dock app (Mac builds only)
+  rc_autologin/.env.example  Default schedule template
+  README-FIRST.txt           Quick start for users
+  BUILD_AND_SHARE.md         Full documentation
+  RCAutoLogin_COMPLETE_GUIDE.txt   This file
+  RCAutoLogin_DEMO_SCRIPT.txt      Demo presenter script
+
+
+================================================================================
+6. WHAT IS EXCLUDED (NEVER SHARE)
+================================================================================
+
+  .env                       Schedule, login ID, PASSWORD
+  chrome-rcx-profile/        Chrome cookies / SSO session
+  .venv/                     Python virtual environment
+  logs/                      Runtime logs
+  dist/                      Old build artifacts
+
+Each user creates their own .env and Chrome profile when they run install.sh.
+
+
+================================================================================
+7. END-USER INSTALL STEPS (MAC & LINUX)
+================================================================================
+
+STEP 1 — Unzip
+  cd ~/Downloads
+  unzip RCAutoLogin-1.0.0-portable.zip
+  cd RCAutoLogin-1.0.0-portable
+
+STEP 2 — Install once
+  chmod +x install.sh launch-gui.sh
+  ./install.sh
+
+  Requires: Python 3.11–3.13, Google Chrome, internet (first time)
+  (Python 3.14 is not supported yet — Playwright/greenlet fail to install)
+
+STEP 3 — Launch GUI
+
+  Mac:
+    Double-click "Launch RCAutoLogin.command"
+    OR open RCAutoLogin.app
+    (First time: right-click app → Open → Open if security warning)
+
+  Linux:
+    ./launch-gui.sh
+
+  Browser opens: http://127.0.0.1:8765/
+
+STEP 4 — Complete one-time setup (Section 2 above)
+
+STEP 5 — Test
+  TODAY tab → Login → RingCX Chrome opens → AVAILABLE
+  Chrome stays open after login
+
+
+================================================================================
+8. GUI TABS EXPLAINED
+================================================================================
+
+  TODAY
+    • Quick actions: Login, Lunch, Back, Logout
+    • Today's schedule summary
+    • Start / Stop auto job, Pause, Leave
+
+  SETUP
+    • Step 1-2-3 progress bar
+    • Save RingCentral login (one-time per user)
+
+  SCHEDULE
+    • Work hours, lunch, timezone, work days
+    • Save schedule button
+
+  LOG
+    • Activity log — what ran and any errors
+
+
+================================================================================
+9. BACKGROUND AUTOMATION
+================================================================================
+
+  What "Start auto job" does:
+    • Installs a background scheduler on your Mac/Linux
+    • Runs login/lunch/logout at saved times every work day
+    • Keeps running if you close GUI browser tab
+    • Keeps running if you close GUI terminal
+    • Restarts on Mac login (LaunchAgent)
+
+  Mac:   LaunchAgent → logs/rc-autologin-scheduler.log
+  Linux: systemd user service
+
+  Check status:
+    .venv/bin/python rc_autologin_run.py service-status
+
+  Stop:
+    TODAY tab → Stop auto job
+    OR: .venv/bin/python rc_autologin_run.py uninstall-service
+
+
+================================================================================
+10. TROUBLESHOOTING
+================================================================================
+
+  GUI feels slow or shows old layout:
+    kill $(lsof -t -i :8765) 2>/dev/null
+    Prefer: .venv/bin/python rc_autologin_run.py   (fastest — same as dev)
+    Browser: Cmd+Shift+R hard refresh
+    Chrome profile is now in ~/.rcautologin (not inside zip folder)
+
+  Bundle much slower than dev folder:
+    Old bundle missing latest fixes — rebuild with build-release
+    Unzip to ~/Applications or ~/RCAutoLogin (avoid iCloud Desktop)
+    Use Launch RCAutoLogin.command or: .venv/bin/python rc_autologin_run.py
+
+  GUI shows old layout (cached page):
+    kill $(lsof -t -i :8765) 2>/dev/null
+    .venv/bin/python rc_autologin_run.py
+    Browser: Cmd+Shift+R hard refresh
+
+  install.sh fails / greenlet build error:
+    Your default python3 may be 3.14 — use Python 3.13 instead:
+      brew install python@3.13
+      rm -rf .venv
+      PYTHON=python3.13 bash setup.sh        # developer
+      PYTHON=python3.13 ./install.sh         # after unzip
+
+  install.sh fails (other):
+    Install Python 3.11, 3.12, or 3.13 (python.org or Homebrew on Mac)
+
+  Chrome not found:
+    Install Google Chrome
+
+  Login failed / browser closed / Playwright error:
+    Quit RCAutoLogin GUI completely, then:
+      kill $(lsof -t -i :8765) 2>/dev/null
+      pkill -f chrome-rcx-profile 2>/dev/null || true
+    Re-open GUI and try Login again.
+    If still failing, delete chrome-rcx-profile/ and set up login fresh.
+
+  Login closes browser:
+    Update to latest version — Login should leave Chrome open
+
+  Login / sign-in feels very slow:
+    First Login on a new install can take 1–2 minutes (Chrome profile + RingCentral SSO).
+    After that, login is faster if Chrome stays open during the shift.
+    Rebuild/update to latest bundle for speed improvements.
+    Optional in .env: RCX_CLICK_WAIT_MS=200  RCX_LOGIN_STEP_WAIT_MS=300
+
+  Auto job not running:
+    TODAY tab → Start auto job
+    Check: service-status command
+
+  MFA / OTP required:
+    Complete once manually in RingCX Chrome; tool waits and continues
+
+  Shared zip contained .env:
+    Rebuild with build-release — never zip project folder manually
+
+
+================================================================================
+11. QUICK COMMAND REFERENCE
+================================================================================
+
+  BUILDER:
+    .venv/bin/python rc_autologin_run.py build-release
+
+  USER (after unzip):
+    ./install.sh
+    ./launch-gui.sh                    # Linux
+    open "Launch RCAutoLogin.command"    # Mac
+
+  DEVELOPER:
+    .venv/bin/python rc_autologin_run.py          # Open GUI
+    .venv/bin/python rc_autologin_run.py show       # Show schedule
+    .venv/bin/python rc_autologin_run.py morning    # Login now
+    .venv/bin/python rc_autologin_run.py install-service
+    .venv/bin/python rc_autologin_run.py service-status
+
+  REGENERATE DEMO PPT:
+    .venv/bin/python scripts/generate_rcautologin_presentation.py
+
+================================================================================
+  End of RCAutoLogin Complete Guide
+================================================================================

@@ -1,0 +1,2 @@
+# Optional — only needed to regenerate RCAutoLogin_Team_Demo.pptx
+python-pptx==1.0.2

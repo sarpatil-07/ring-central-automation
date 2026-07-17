@@ -1,0 +1,32 @@
+# UI labels for RingCentral.app
+
+app_process: RingCentral
+
+# Left sidebar tab (exact label in app)
+agent_tab: Agent
+
+# Only shown ON the Agent tab — used to detect if we are already there
+on_agent_tab_markers:
+  - Start working
+  - Stop working
+
+# Work session
+start_working: Start working
+start_working_aliases:
+  - Start working
+  - Start Working
+stop_working: Stop working
+stop_working_aliases:
+  - Stop working
+  - Stop Working
+
+# Status (after connected, default is Available)
+available: Available
+unavailable: Unavailable
+lunch: Lunch
+
+# Shown when agent session is connected
+connected_markers:
+  - Available
+  - Stop working
+  - Unavailable

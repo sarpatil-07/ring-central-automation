@@ -1,0 +1,63 @@
+# UI selectors from your Chrome Inspect HTML (stable ids / aria-labels)
+
+switch_application:
+  xpath: "//div[contains(@class,'app-picker-panel') and @aria-label='Switch application']"
+  css: ""
+  text: ""
+
+max_button:
+  xpath: "//a[@id='select-max']"
+  css: "#select-max"
+  text: ""
+
+station_id_option:
+  xpath: "//input[@id='radioStation']"
+  css: "#radioStation"
+  text: ""
+
+station_id_label:
+  xpath: "//label[@for='radioStation']"
+  css: "label[for='radioStation']"
+  text: "Set Station ID"
+
+station_id_input:
+  xpath: "//input[@id='stationIdText']"
+  css: "#stationIdText"
+  text: ""
+
+remember_me:
+  xpath: "//input[@id='cbRememberMe']"
+  css: "#cbRememberMe"
+  text: ""
+
+connect_button:
+  xpath: "//button[contains(@class,'connect') and @aria-label='Connect']"
+  css: "button.button.connect"
+  text: ""
+
+status_menu:
+  xpath: "//span[contains(@class,'current-state')]"
+  css: "span.current-state"
+  text: ""
+
+status_available:
+  xpath: "//li[@data-state='Available']"
+  css: "li[data-state='Available']"
+  text: ""
+
+status_unavailable_lunch:
+  xpath: "//li[@data-outstate-description='Lunch']"
+  css: "li[data-outstate-description='Lunch']"
+  text: ""
+
+status_logout:
+  xpath: "//li[@data-state='Logout']"
+  css: "li[data-state='Logout']"
+  text: ""
+
+# After status → Logout, confirm in the warning dialog
+logout_confirm:
+  xpath: "//div[contains(@class,'dialog-contents')]//button[contains(@class,'confirm-button') and (@title='Log out' or normalize-space()='Log out')]"
+  css: "button.confirm-button[title='Log out'], div.dialog-contents button.confirm-button"
+  text: "Log out"
+

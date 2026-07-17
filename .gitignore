@@ -1,0 +1,49 @@
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+.pytest_cache/
+.mypy_cache/
+
+# User secrets & local config — NEVER commit
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials*.json
+secrets/
+
+# Runtime / user data
+logs/
+*.log
+screenshots/
+dist/
+*.zip
+
+# Chrome profiles (login cookies / sessions)
+chrome-debug-profile/
+chrome-max-profile/
+chrome-rcx-profile/
+.rcautologin/
+
+# Local scheduler / app state (home dir is outside repo, but keep if copied)
+autorun.enabled
+autorun.disabled
+job-last-run.json
+schedule-job.lock
+
+# IDE / OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
+.cursor/
+
+# Misc
+recorded-selectors.yaml
+rc_agent/data/
