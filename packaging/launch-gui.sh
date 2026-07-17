@@ -1,14 +1,25 @@
 #!/usr/bin/env bash
-# Start RCAutoLogin GUI. Uses the same fast path as Launch RCAutoLogin.command.
+# Start RCAutoLogin GUI (Mac + Linux).
+# Works from portable zip root or from packaging/ in a git clone.
 set -euo pipefail
-ROOT="$(cd "$(dirname "$0")" && pwd)"
+
+HERE="$(cd "$(dirname "$0")" && pwd)"
+if [[ -f "$HERE/rc_autologin_run.py" ]]; then
+  ROOT="$HERE"
+elif [[ -f "$HERE/../rc_autologin_run.py" ]]; then
+  ROOT="$(cd "$HERE/.." && pwd)"
+else
+  echo "Cannot find rc_autologin_run.py near $HERE" >&2
+  exit 1
+fi
+
 cd "$ROOT"
 PORT=8765
 URL="http://127.0.0.1:${PORT}/"
 PYTHON="${ROOT}/.venv/bin/python"
 
 if [[ ! -x "$PYTHON" ]]; then
-  echo "Run ./install.sh first." >&2
+  echo "Run ./install.sh first (or: bash packaging/install.sh)." >&2
   exit 1
 fi
 
@@ -22,11 +33,10 @@ open_url() {
   fi
 }
 
-# Already running — just open the control panel (instant).
+# Already running — just open the control panel.
 if curl -sf "${URL}api/state" >/dev/null 2>&1 || curl -sf "${URL}api/status" >/dev/null 2>&1; then
   open_url "$URL"
   exit 0
 fi
 
-# Fast path: same as dev — no nohup, no curl polling loop.
 exec "$PYTHON" rc_autologin_run.py

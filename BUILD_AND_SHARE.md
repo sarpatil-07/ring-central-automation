@@ -6,9 +6,13 @@
 
 ### Prerequisites
 
+- **Python 3.12+** (3.12 or 3.13; 3.14+ not supported yet)
+- Google Chrome
+
 ```bash
 cd ~/Projects/Ring_Central_Automation
 bash setup.sh    # first time only — creates .venv
+# or: PYTHON=python3.12 bash packaging/install.sh
 ```
 
 ### Build the shareable zip
@@ -21,7 +25,7 @@ cd ~/Projects/Ring_Central_Automation
 **Output file:**
 
 ```
-dist/RCAutoLogin-1.0.0-portable.zip
+dist/RCAutoLogin-1.1.0-portable.zip
 ```
 
 Or use the helper script:
@@ -97,14 +101,14 @@ This creates:
 - `.env` — default schedule (from template)
 - `chrome-rcx-profile/` — empty, for their login only
 
-**Requires:** Python 3.11+, Google Chrome, internet for first install.
+**Requires:** Python 3.12+, Google Chrome, internet for first install.
 
 ### 3. Launch GUI
 
-| Platform | How |
-|----------|-----|
-| **Mac** | Double-click `Launch RCAutoLogin.command` or `RCAutoLogin.app` |
-| **Linux** | `./launch-gui.sh` |
+| Platform | Command / action |
+|----------|------------------|
+| **Mac** | `./launch-gui.sh`  ·  or double-click `Launch RCAutoLogin.command`  ·  or `.venv/bin/python rc_autologin_run.py` |
+| **Linux** | `./launch-gui.sh`  ·  or `.venv/bin/python rc_autologin_run.py` |
 
 Browser opens at `http://127.0.0.1:8765/`
 

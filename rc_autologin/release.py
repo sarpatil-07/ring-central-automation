@@ -22,6 +22,7 @@ INCLUDE = (
     "rc_autologin.sh",
     "config.py",
     "requirements.txt",
+    "README.md",
     "RC_AUTOLOGIN_SETUP.md",
     "SHARE.md",
     "BUILD_AND_SHARE.md",
@@ -166,18 +167,34 @@ def _write_share_readme(root: Path) -> None:
         f"""RCAutoLogin {VERSION} — portable bundle (Mac + Linux)
 ================================================
 
+PREREQUISITES
+-------------
+  - Python 3.12+ (use 3.12 or 3.13; 3.14+ not supported yet)
+  - Google Chrome (or Chromium)
+  - Desktop session (Mac/Linux GUI)
+
 QUICK START
 -----------
 1. Unzip this folder anywhere (e.g. ~/RCAutoLogin)
 
-2. First time only — Terminal in this folder:
+2. First time only — open Terminal in this folder:
      cd RCAutoLogin-{VERSION}-portable
+     chmod +x install.sh launch-gui.sh "Launch RCAutoLogin.command"
      ./install.sh
 
 3. Launch GUI:
-   Mac:   double-click "Launch RCAutoLogin.command" (fastest)
-          or open RCAutoLogin.app (same speed after this update)
-   Linux: ./launch-gui.sh
+
+   === macOS ===
+     ./launch-gui.sh
+     # or double-click:  Launch RCAutoLogin.command
+     # or:  open RCAutoLogin.app
+     # or:  .venv/bin/python rc_autologin_run.py
+
+   === Linux ===
+     ./launch-gui.sh
+     # or:  .venv/bin/python rc_autologin_run.py
+
+   Browser opens at http://127.0.0.1:8765/
 
    Tip: Keep the unzipped folder on local disk (e.g. ~/RCAutoLogin),
    not in Downloads/iCloud — faster Python + Chrome startup.
@@ -193,10 +210,7 @@ This zip does NOT contain anyone else's login or schedule.
 install.sh creates a fresh .env for you.
 Chrome profile + logs live in ~/.rcautologin (fast local disk).
 
-FASTEST LAUNCH (recommended)
-----------------------------
-  .venv/bin/python rc_autologin_run.py
-  OR double-click "Launch RCAutoLogin.command"
+Releases: https://github.com/sarpatil-07/ring-central-automation/releases
 
 See BUILD_AND_SHARE.md and SHARE.md for details.
 """,
