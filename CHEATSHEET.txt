@@ -1,4 +1,4 @@
-RingCentralAutoSet — Quick Cheatsheet
+RingCentralAutoSet — Quick Cheatsheet for older ringcentral max agent
 =====================================
 
 Project folder: ~/Projects/Ring_Central_Automation
