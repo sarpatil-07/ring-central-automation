@@ -281,27 +281,7 @@ STEP 5 — Test
     Rebuild with build-release — never zip project folder manually
 
 
-================================================================================
-11. QUICK COMMAND REFERENCE
-================================================================================
 
-  BUILDER:
-    .venv/bin/python rc_autologin_run.py build-release
-
-  USER (after unzip):
-    ./install.sh
-    ./launch-gui.sh                    # Linux
-    open "Launch RCAutoLogin.command"    # Mac
-
-  DEVELOPER:
-    .venv/bin/python rc_autologin_run.py          # Open GUI
-    .venv/bin/python rc_autologin_run.py show       # Show schedule
-    .venv/bin/python rc_autologin_run.py morning    # Login now
-    .venv/bin/python rc_autologin_run.py install-service
-    .venv/bin/python rc_autologin_run.py service-status
-
-  REGENERATE DEMO PPT:
-    .venv/bin/python scripts/generate_rcautologin_presentation.py
 
 ================================================================================
   End of RCAutoLogin Complete Guide
