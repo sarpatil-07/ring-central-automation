@@ -1,9 +1,11 @@
-# RCAutoLogin
+# RCAutoLogin (RingCX)
 
-Automate **RingCX** web agent login, lunch/dinner, break, and logout on a daily schedule.
+Automate the **Ring Central RingCX web agent** (`app.ringcentral.com/ring_cx/agent`): daily login → AVAILABLE, lunch/dinner, break, back to AVAILABLE, and logout — on your saved schedule.
 
 **Repo:** https://github.com/sarpatil-07/ring-central-automation  
 **Releases:** https://github.com/sarpatil-07/ring-central-automation/releases
+
+This repository documents **RCAutoLogin only** (GUI + background scheduler for RingCX). Use `rc_autologin_run.py` / `./launch-gui.sh`.
 
 ---
 
@@ -24,17 +26,17 @@ sudo dnf install python3.12 google-chrome-stable
 # or: sudo dnf install chromium
 ```
 
-**Fedora / Linux install notes:**  
-If `./install.sh` prints `chrome is already installed` or `BEWARE: … ubuntu20.04-x64`, that is **normal** — setup still completed. RCAutoLogin uses your system Chrome; Playwright may download a Chromium helper with an Ubuntu fallback build.
+**Fedora / Linux:** If `./install.sh` prints `chrome is already installed` or `BEWARE: … ubuntu20.04-x64`, that is **normal**. Setup still completed.
+
 ---
 
 ## Install (from release zip)
 
 1. Download **RCAutoLogin-*-portable.zip** from [Releases](https://github.com/sarpatil-07/ring-central-automation/releases)
-2. Unzip, then in Terminal:
+2. Unzip, then:
 
 ```bash
-cd ~/Downloads/RCAutoLogin-*-portable   # or wherever you unzipped
+cd ~/Downloads/RCAutoLogin-*-portable   # or your unzip path
 chmod +x install.sh launch-gui.sh "Launch RCAutoLogin.command"
 ./install.sh
 ```
@@ -46,33 +48,19 @@ chmod +x install.sh launch-gui.sh "Launch RCAutoLogin.command"
 ### Mac
 
 ```bash
-cd /path/to/RCAutoLogin-*-portable
-
-# Option A — script (recommended)
 ./launch-gui.sh
-
-# Option B — double-click in Finder
-open "Launch RCAutoLogin.command"
-
-# Option C — direct Python
-.venv/bin/python rc_autologin_run.py
+# or: open "Launch RCAutoLogin.command"
+# or: .venv/bin/python rc_autologin_run.py
 ```
-
-Or open **RCAutoLogin.app** if included in the zip.
 
 ### Linux
 
 ```bash
-cd /path/to/RCAutoLogin-*-portable
-
-# Option A — script (recommended)
 ./launch-gui.sh
-
-# Option B — direct Python
-.venv/bin/python rc_autologin_run.py
+# or: .venv/bin/python rc_autologin_run.py
 ```
 
-GUI opens at **http://127.0.0.1:8765/**
+GUI: **http://127.0.0.1:8765/**
 
 ---
 
@@ -81,26 +69,35 @@ GUI opens at **http://127.0.0.1:8765/**
 ```bash
 git clone https://github.com/sarpatil-07/ring-central-automation.git
 cd ring-central-automation
-cp .env.example .env          # add your login + schedule
+cp .env.example .env          # add your own login + schedule
 bash packaging/install.sh
-./packaging/launch-gui.sh     # or: .venv/bin/python rc_autologin_run.py
+./packaging/launch-gui.sh
 ```
 
 ---
 
-## First-time setup in the GUI
+## First-time setup (GUI)
 
-1. **Setup** tab → save RingCentral email + password  
-2. **Schedule** tab → work / lunch times → Save  
-3. **Today** tab → **Start auto job**
+1. **Setup** → RingCentral email + password → **Save login** (stored locally on the machine)  
+2. **Schedule** → work / lunch times, timezone, work days → **Save schedule**  
+3. **Today** → **Start auto job**
 
-**Manage RingCX from Today:** Login, Lunch/Dinner, Break, Back, Logout; plus Start/Stop auto job, Pause/Resume, Mark leave (logout + pause until Clear leave), and Close RingCX Chrome.
+After that, you can close the GUI — scheduled jobs keep running in the background.
 
-Credentials stay in local `.env` (never commit that file).
+### Manage RingCX from Today
+
+**Quick actions:** Login · Lunch/Dinner · Break · Back · Logout  
+
+**Background:** Start / Stop auto job · Pause / Resume · **Mark leave** (logout + pause until **Clear leave**) · Close RingCX Chrome  
+
+Credentials stay in local `.env` — never commit that file.
 
 ---
 
-## Docs
+## More docs
 
-- `RC_AUTOLOGIN_SETUP.md` — full setup  
-- `SHARE.md` / `BUILD_AND_SHARE.md` — building the portable zip  
+| Doc | Contents |
+|-----|----------|
+| [RC_AUTOLOGIN_SETUP.md](RC_AUTOLOGIN_SETUP.md) | Full setup, schedule, leave, CLI |
+| [BUILD_AND_SHARE.md](BUILD_AND_SHARE.md) | Build portable zip for Mac/Linux |
+| [SHARE.md](SHARE.md) | Short share checklist |

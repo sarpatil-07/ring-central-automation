@@ -1,8 +1,10 @@
-# RCAutoLogin — Build zip bundle & share with users
+# RCAutoLogin — Build zip & share (RingCX)
+
+Guide for packaging **RCAutoLogin** (RingCX web agent) for Mac and Linux users.
 
 ---
 
-## Part A — You build the zip (once per release)
+## Part A — Build the zip (once per release)
 
 ### Prerequisites
 
@@ -10,122 +12,105 @@
 - Google Chrome
 
 ```bash
-cd ~/Projects/Ring_Central_Automation
-bash setup.sh    # first time only — creates .venv
-# or: PYTHON=python3.12 bash packaging/install.sh
+cd ~/Projects/Ring_Central_Automation   # or your clone
+bash packaging/install.sh               # first time — creates .venv
 ```
 
-### Build the shareable zip
+### Build
 
 ```bash
-cd ~/Projects/Ring_Central_Automation
 .venv/bin/python rc_autologin_run.py build-release
 ```
 
-**Output file:**
+**Output:**
 
 ```
 dist/RCAutoLogin-1.1.0-portable.zip
 ```
 
-Or use the helper script:
-
-```bash
-./scripts/build_zip.sh
-```
-
-### What is **included** in the zip
+### Included
 
 | Included | Purpose |
 |----------|---------|
-| Python app code (`rc_autologin/`, `rc_autologin_run.py`) | Automation + GUI |
+| `rc_autologin/`, `rc_autologin_run.py` | RingCX automation + GUI |
 | `requirements.txt` | Dependencies |
 | `install.sh`, `launch-gui.sh` | Setup & launch |
 | `Launch RCAutoLogin.command` | Mac double-click launcher |
-| `RCAutoLogin.app` (Mac builds) | Dock launcher |
-| `rc_autologin/.env.example` | Default schedule template |
-| `README-FIRST.txt`, docs | Instructions |
+| `RCAutoLogin.app` (Mac builds) | Optional Dock launcher |
+| `.env.example`, `README-FIRST.txt`, docs | Instructions |
 
-### What is **excluded** (never share these)
+### Excluded (never share)
 
 | Excluded | Why |
 |----------|-----|
-| `.env` | Your schedule, **login ID & password** |
-| `chrome-rcx-profile/` | Chrome cookies / SSO session |
-| `.venv/` | Your local Python environment |
-| `logs/` | Your runtime logs |
+| `.env` | Login ID & password |
+| `chrome-rcx-profile/` | Chrome session cookies |
+| `.venv/` | Local Python environment |
+| `logs/` | Runtime logs |
 | `dist/` | Old build artifacts |
-| Legacy folders (`chrome-max-profile/`, etc.) | Not used by RCAutoLogin |
 
-Each user gets a **fresh `.env`** and **empty Chrome profile** when they run `install.sh`.
+Each user gets a **fresh `.env`** when they run `install.sh`.
 
-### Before you send the zip — checklist
+### Checklist before sharing
 
-- [ ] Built with `build-release` (not manual zip of whole folder)
-- [ ] You are **not** zipping your project folder by hand with `.env` inside
-- [ ] Test zip on another machine or clean folder if possible
-- [ ] Share via Drive / Slack / email (zip is ~1–5 MB before `install.sh` downloads Chrome libs)
+- [ ] Built with `build-release` (not a manual zip of the whole project)
+- [ ] No `.env` inside the zip
+- [ ] Test on a clean folder / machine if possible
 
-### Optional: verify zip contents
+### Verify zip
 
 ```bash
-unzip -l dist/RCAutoLogin-1.0.0-portable.zip | head -40
+unzip -l dist/RCAutoLogin-1.1.0-portable.zip | head -40
 # Should NOT list .env or chrome-rcx-profile
 ```
 
 ---
 
-## Part B — End user installs (Mac or Linux)
+## Part B — End user install (Mac or Linux)
 
 ### 1. Unzip
 
 ```bash
-# Example: Downloads folder
 cd ~/Downloads
-unzip RCAutoLogin-1.0.0-portable.zip
-cd RCAutoLogin-1.0.0-portable
+unzip RCAutoLogin-1.1.0-portable.zip
+cd RCAutoLogin-1.1.0-portable
 ```
 
-Or unzip in Finder → move folder to `~/RCAutoLogin`
+Prefer a local folder (e.g. `~/RCAutoLogin`), not iCloud Downloads.
 
 ### 2. One-time install
 
 ```bash
-cd ~/RCAutoLogin/RCAutoLogin-1.0.0-portable
-chmod +x install.sh launch-gui.sh
+chmod +x install.sh launch-gui.sh "Launch RCAutoLogin.command"
 ./install.sh
 ```
 
-This creates:
-- `.venv/` — Python packages + Playwright browser
-- `.env` — default schedule (from template)
-- `chrome-rcx-profile/` — empty, for their login only
+Creates `.venv/`, `.env` from template, and Playwright browser support.
 
-**Requires:** Python 3.12+, Google Chrome, internet for first install.
+**Requires:** Python 3.12+, Chrome/Chromium, internet for first install.
 
 ### 3. Launch GUI
 
-| Platform | Command / action |
-|----------|------------------|
-| **Mac** | `./launch-gui.sh`  ·  or double-click `Launch RCAutoLogin.command`  ·  or `.venv/bin/python rc_autologin_run.py` |
-| **Linux** | `./launch-gui.sh`  ·  or `.venv/bin/python rc_autologin_run.py` |
+| Platform | Command |
+|----------|---------|
+| **Mac** | `./launch-gui.sh` · or double-click `Launch RCAutoLogin.command` · or `.venv/bin/python rc_autologin_run.py` |
+| **Linux** | `./launch-gui.sh` · or `.venv/bin/python rc_autologin_run.py` |
 
-Browser opens at `http://127.0.0.1:8765/`
+Opens **http://127.0.0.1:8765/**
 
-### 4. One-time setup in GUI (each user)
+### 4. One-time GUI setup
 
 | Step | Tab | Action |
 |------|-----|--------|
-| 1 | **Setup** | Enter email + password → **Save login** |
-| 2 | **Schedule** | Set work/lunch times → **Save schedule** |
-| 3 | **Today** | Click **Start auto job** |
-
-After step 3, daily login/lunch/logout runs in the background — even if they close the browser tab.
+| 1 | **Setup** | Email + password → **Save login** |
+| 2 | **Schedule** | Work/lunch times → **Save schedule** |
+| 3 | **Today** | **Start auto job** |
 
 ### 5. Daily use
 
-- **Today** tab → **Login** (manual test) or rely on auto job
-- No need to keep GUI open after **Start auto job**
+- Rely on the background job, or use **Today** quick actions: Login, Lunch/Dinner, Break, Back, Logout  
+- **Mark leave** = logout + pause until **Clear leave** (safe for multi-day leave)  
+- No need to keep the GUI open after **Start auto job**
 
 ---
 
@@ -133,15 +118,16 @@ After step 3, daily login/lunch/logout runs in the background — even if they c
 
 ### Mac
 
-- First open of `RCAutoLogin.app`: right-click → **Open** → **Open** (unsigned app)
-- Background job: macOS LaunchAgent (starts on login)
+- First open of `RCAutoLogin.app`: right-click → **Open** (if Gatekeeper warns)
+- Background: LaunchAgent on login
 - Logs: `logs/rc-autologin-scheduler.log`
 
-### Linux
+### Linux (Ubuntu / Fedora)
 
-- Install Python: `sudo apt install python3 python3-venv`
-- Background job: systemd user service
-- Optional: `loginctl enable-linger $USER` (keep running after logout)
+- Python: `python3.12` / `python3.13`
+- Background: systemd user service
+- Fedora: Playwright `ubuntu20.04` fallback warnings are OK
+- Optional: `loginctl enable-linger $USER`
 
 ---
 
@@ -149,10 +135,10 @@ After step 3, daily login/lunch/logout runs in the background — even if they c
 
 | Problem | Fix |
 |---------|-----|
-| `install.sh` fails | Install Python 3.11+ |
-| Chrome not found | Install Google Chrome |
-| GUI blank / old UI | Hard refresh Cmd+Shift+R; restart server |
-| Shared zip had `.env` inside | Rebuild with `build-release` — never zip project folder manually |
+| `install.sh` fails on Python | Install Python 3.12 or 3.13 |
+| Chrome not found | Install Google Chrome or Chromium |
+| GUI looks old | Hard refresh (Cmd/Ctrl+Shift+R); restart `./launch-gui.sh` |
+| Zip contained `.env` | Rebuild with `build-release` only |
 
 ---
 
@@ -164,6 +150,5 @@ After step 3, daily login/lunch/logout runs in the background — even if they c
 
 # User (after unzip)
 ./install.sh
-./launch-gui.sh          # Linux
-# or Launch RCAutoLogin.command   # Mac
+./launch-gui.sh
 ```

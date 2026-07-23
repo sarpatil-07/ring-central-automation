@@ -27,8 +27,6 @@ INCLUDE = (
     "SHARE.md",
     "BUILD_AND_SHARE.md",
     "RCAutoLogin_COMPLETE_GUIDE.txt",
-    "RCAutoLogin_DEMO_SCRIPT.txt",
-    "RCAutoLogin_TEAM_DEMO.md",
     "packaging/install.sh",
     "packaging/pick_python.sh",
     "packaging/launch-gui.sh",

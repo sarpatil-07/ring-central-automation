@@ -36,7 +36,43 @@ fi
 source .venv/bin/activate
 pip install -q --upgrade pip
 pip install -q -r requirements.txt
-python -m playwright install chrome 2>/dev/null || python -m playwright install chromium
+
+# Playwright browsers:
+# - Mac: install Chrome channel for Playwright
+# - Linux: use system Google Chrome / Chromium if present; otherwise install Playwright Chromium.
+#   "chrome is already installed" is normal on Fedora/Ubuntu and is NOT a failure.
+_install_playwright_browsers() {
+  local os
+  os="$(uname -s)"
+  if [[ "$os" == "Darwin" ]]; then
+    if python -m playwright install chrome; then
+      return 0
+    fi
+    echo "Note: Playwright Chrome install skipped/failed — trying Chromium…"
+    python -m playwright install chromium || true
+    return 0
+  fi
+
+  # Linux (Fedora, Ubuntu, etc.)
+  if command -v google-chrome >/dev/null 2>&1 \
+    || command -v google-chrome-stable >/dev/null 2>&1 \
+    || command -v chromium >/dev/null 2>&1 \
+    || command -v chromium-browser >/dev/null 2>&1; then
+    echo "System Chrome/Chromium found — Playwright will use it (skipping playwright install chrome)."
+  else
+    echo "No system Chrome found — installing Playwright Chromium…"
+  fi
+  # Always ensure Playwright has a browser binary for its driver (hermetic Chromium).
+  # Ubuntu20.04 fallback warnings on Fedora are harmless.
+  if ! python -m playwright install chromium; then
+    echo "WARNING: playwright install chromium failed." >&2
+    echo "  If Login fails later, try:  .venv/bin/python -m playwright install chromium" >&2
+  fi
+  # Optional OS libs (may need sudo; ignore failure on locked-down machines).
+  python -m playwright install-deps chromium >/dev/null 2>&1 || true
+}
+
+_install_playwright_browsers
 
 if [[ ! -f .env ]]; then
   if [[ -f .env.example ]]; then
@@ -66,5 +102,6 @@ else
   fi
 fi
 echo ""
-echo "Requires: Python 3.12+, Google Chrome, desktop session."
+echo "Requires: Python 3.12+, Google Chrome (or Chromium), desktop session."
+echo "Fedora note: Playwright may print ubuntu20.04 fallback warnings — that is OK."
 echo ""

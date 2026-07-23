@@ -1,137 +1,149 @@
-# RCAutoLogin — RingCX Web Agent
+# RCAutoLogin — RingCX setup guide
 
-Automates **https://app.ringcentral.com/ring_cx/agent** in a **dedicated Chrome profile**.
+Automates **https://app.ringcentral.com/ring_cx/agent** in a **dedicated Chrome profile** (separate from your normal work browser).
 
-**RCAutoLogin only** — use `rc_autologin_run.py` (not `run.py` or other tools).
+**Entry point:** `rc_autologin_run.py` or `./launch-gui.sh`  
+**GUI:** http://127.0.0.1:8765/
+
+---
+
+## Prerequisites
+
+| Requirement | Notes |
+|-------------|--------|
+| **Python 3.12+** | **3.12 or 3.13** (3.14+ not supported yet) |
+| **Google Chrome** | Or Chromium |
+| **Desktop session** | Mac/Linux GUI (not headless SSH only) |
+
+```bash
+# macOS
+brew install python@3.12
+```
 
 ---
 
 ## What it does
 
-| Time | Actions |
-|------|---------|
-| Work start | Open RingCX Chrome → Agent tab → **Start session** → **AVAILABLE** |
-| Lunch | Presence pill → **LUNCH** |
-| After lunch | Presence pill → **AVAILABLE** |
-| Work end | Presence pill → **Stop session** → close browser |
+| Time | Action |
+|------|--------|
+| Work start | Open RingCX Chrome → Agent → **Start session** → **AVAILABLE** |
+| Lunch / Dinner | Set presence → **LUNCH** |
+| Break (manual) | Set presence → **ON-BREAK** |
+| Back | Set presence → **AVAILABLE** |
+| Work end | **Stop session** → close RingCX browser |
 
-Uses stable `data-test-automation-id` selectors (see `rc_autologin/selectors.yaml`).
+Selectors live in `rc_autologin/selectors.yaml`.
 
 ---
 
 ## First install
 
+### From release zip
+
 ```bash
-cd ~/Projects/Ring_Central_Automation
-bash setup.sh   # once: venv + Playwright + Chrome
-.venv/bin/python rc_autologin_run.py   # open GUI
+unzip RCAutoLogin-*-portable.zip
+cd RCAutoLogin-*-portable
+./install.sh
+./launch-gui.sh
+```
+
+### From git clone
+
+```bash
+cd ring-central-automation
+bash packaging/install.sh
+./packaging/launch-gui.sh
+# or: .venv/bin/python rc_autologin_run.py
 ```
 
 ---
 
 ## One-time setup (each user)
 
-1. **Save login (once)** — email + password in GUI → stored in local `.env`
-2. **Save schedule** — work start/end, lunch times, timezone
-3. **Start auto job** — click in GUI or run `install-service`
+1. **Setup** tab — email + password → **Save login** (local `.env` on this machine only)  
+2. **Schedule** tab — work start/end, lunch, timezone, work days → **Save schedule**  
+3. **Today** tab — **Start auto job**
 
-After step 3, you can **close the GUI browser tab and terminal** — daily jobs still run on schedule.
+Then you may close the GUI tab/terminal. Daily jobs still run.
 
 ---
 
-## Daily background (runs without GUI)
-
-The **GUI is only a control panel**. The scheduler is a **separate background process**.
+## Background scheduler
 
 | | |
 |--|--|
-| **Start once** | GUI → **Start auto job**, or `.venv/bin/python rc_autologin_run.py install-service` |
-| **Runs when** | Your saved work times, every configured work day |
-| **Survives** | Closing GUI tab, stopping GUI terminal, Mac/Linux restart |
-| **Mac** | LaunchAgent — starts on login |
+| **Start** | GUI → **Start auto job**, or `rc_autologin_run.py install-service` |
+| **Stop** | GUI → **Stop**, or `uninstall-service` |
+| **Mac** | LaunchAgent — starts on Mac login |
 | **Linux** | systemd user service |
 | **Logs** | `logs/rc-autologin-scheduler.log` |
 
-Check status: `.venv/bin/python rc_autologin_run.py service-status`
+Status: `.venv/bin/python rc_autologin_run.py service-status`
+
+**Missed jobs:** if the laptop was asleep or you logged in after work start, catch-up can still run login (and other due jobs) during the work day.
 
 ---
 
-## Daily use — GUI (optional control panel)
+## Today tab — manage RingCX
 
-```bash
-.venv/bin/python rc_autologin_run.py
-# or
-./rc_autologin.sh
-```
-
-Opens a **browser window** at `http://127.0.0.1:8765/` with:
-- **One-time setup checklist** — login, schedule, Start auto job
-- **RingCentral login** — save once per user (local `.env`)
-- **Schedule fields** — work start/end, lunch, timezone → **Save schedule**
-- **Run now** — manual Login, Lunch, Back, Logout (for testing)
-- **Daily background job** — Start / Stop auto job, Pause, leave today
-- **Activity log** at the bottom
-
-Closing the GUI does **not** stop the background scheduler (if Start auto job was clicked).
-
-Press **Ctrl+C** in the terminal only stops the **GUI server**, not the scheduler.
-
-### Dock app (one-click launch)
-
-```bash
-.venv/bin/python rc_autologin_run.py install-app
-```
-
-This installs **RCAutoLogin.app** in `~/Applications`. Drag it to your Dock.
-
-- Double-click opens the GUI in your browser (starts the server in the background if needed).
-- If the GUI is already running, it just opens the browser tab again.
-- Logs: `logs/gui-server.log`
-
-Remove: `.venv/bin/python rc_autologin_run.py uninstall-app`
-
-### Share with others (Mac + Linux)
-
-```bash
-.venv/bin/python rc_autologin_run.py build-release
-```
-
-Creates `dist/RCAutoLogin-1.0.0-portable.zip` — send to anyone. They unzip, run `./install.sh` once, then launch. See **SHARE.md**.
-
-Text menu (CLI): `.venv/bin/python rc_autologin_run.py menu`
-
-Menu options:
-- **2** — Set all times (work start/end, lunch start/end, e.g. 1 hour lunch 13:00–14:00)
-- **m/l/b/g** — Run login, lunch, back from lunch, logout now
-- **i** — Start background job (auto on Mac login)
-- **o** — Stop background job
-- **t** — Background job status
+| Control | Purpose |
+|---------|---------|
+| **Login** | Morning flow now |
+| **Lunch/Dinner** | Set LUNCH |
+| **Break** | Set ON-BREAK |
+| **Back** | Set AVAILABLE |
+| **Logout** | Stop session + close browser |
+| **Start / Stop auto job** | Enable or disable background schedule |
+| **Pause / Resume** | Temporarily stop / restart scheduled jobs |
+| **Mark leave** | Logout now **and pause** scheduler until you return |
+| **Clear leave** | Resume scheduler (multi-day leave safe) |
+| **Close RingCX Chrome** | Clean up after closing Chrome manually |
 
 ---
 
-## Commands (CLI)
+## Leave
+
+- **Mark leave** → logs out of RingCX and **pauses** the background job  
+- Jobs stay off for tomorrow and later days until **Clear leave**  
+- **Clear leave** → resumes the scheduler  
+
+---
+
+## CLI (optional)
 
 ```bash
 .venv/bin/python rc_autologin_run.py show
 .venv/bin/python rc_autologin_run.py morning
 .venv/bin/python rc_autologin_run.py lunch
+.venv/bin/python rc_autologin_run.py break
 .venv/bin/python rc_autologin_run.py lunch-end
 .venv/bin/python rc_autologin_run.py logout
-.venv/bin/python rc_autologin_run.py schedule
 .venv/bin/python rc_autologin_run.py install-service
 .venv/bin/python rc_autologin_run.py uninstall-service
+.venv/bin/python rc_autologin_run.py service-status
+.venv/bin/python rc_autologin_run.py menu
+.venv/bin/python rc_autologin_run.py build-release
 ```
 
 ---
 
-## Optional `.env`
+## Optional `.env` keys
 
 ```bash
 RCX_AGENT_URL=https://app.ringcentral.com/ring_cx/agent?env=production
-CHROME_RCX_PROFILE_DIR=./chrome-rcx-profile
-CHROME_RCX_CDP_PORT=9334
-RCX_CONNECT_WAIT_SECONDS=30
+RCX_LOGIN_ID=you@company.com
+RCX_LOGIN_PASSWORD=
+RCX_AUTO_LOGIN_ENABLED=true
+TIMEZONE=Asia/Kolkata
+WORK_DAYS=mon,tue,wed,thu,fri
+WORK_START=09:00
+WORK_END=18:00
+LUNCH_START=13:00
+LUNCH_END=14:00
+LUNCH_ENABLED=true
 ```
+
+Copy from `.env.example`. Never commit `.env`.
 
 ---
 
@@ -144,15 +156,15 @@ logs/rc-autologin-scheduler.err.log
 
 ---
 
-## Selectors (if UI changes)
+## Selectors (if RingCX UI changes)
 
 Edit `rc_autologin/selectors.yaml`:
 
-| Step | Selector |
-|------|----------|
-| Agent tab | `data-test-automation-id="rcxAgent"` |
-| Start session | `rcx-presence-pill[connectstate="disconnected"]` |
-| Status pill | `rcx-presence-pill[connectstate="connected"]` |
+| Step | Selector key |
+|------|----------------|
+| Agent tab | `rcxAgent` |
+| Presence pill | `rcx-presence-pill` |
 | AVAILABLE | `rcx-presence-menu-item-AVAILABLE` |
 | LUNCH | `rcx-presence-menu-item-LUNCH` |
+| ON-BREAK | `ON-BREAK` / `break_menu` |
 | Stop session | `rcx-presence-menu-item-stop-session` |

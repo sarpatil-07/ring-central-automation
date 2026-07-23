@@ -25,14 +25,16 @@ TABLE OF CONTENTS
 RCAutoLogin automates the RingCX web agent daily routine:
 
   Work start  → Login → Agent tab → Start session → AVAILABLE
-  Lunch       → Set LUNCH status
-  After lunch → Set AVAILABLE
+  Lunch       → Set Lunch/Dinner (LUNCH)
+  Break       → Set ON-BREAK (manual quick action)
+  After lunch → Set AVAILABLE (Back)
   Work end    → Stop session → close browser
 
   • Runs on YOUR computer only (not cloud)
-  • Uses a SEPARATE Chrome window (not your work Chrome)
+  • Uses a SEPARATE Chrome window for RingCX (not your work Chrome)
   • Control panel: web GUI at http://127.0.0.1:8765/
   • Works on Mac and Linux (desktop + Google Chrome required)
+  • This guide is for RCAutoLogin / RingCX only
 
 
 ================================================================================
@@ -46,7 +48,7 @@ After install.sh, open the GUI and complete 3 steps:
     • Enter password (hidden field, Show/Hide button)
     • Check "Auto sign-in when not logged in"
     • Click "Save login"
-    • Saved locally in .env on YOUR machine only
+    • Saved locally in .env on YOUR machine only (Mac or Linux)
 
   Step 2 — SCHEDULE tab
     • Work start (login time)
@@ -73,11 +75,13 @@ Daily jobs still run on schedule in the background.
 
   Manual (optional):
     • Open GUI → TODAY tab
-    • Login | Lunch | Back | Logout buttons
+    • Login | Lunch/Dinner | Break | Back | Logout
     • Chrome stays open after Login (only Logout closes browser)
 
   Pause / leave:
-    • TODAY tab → Pause or Mark leave today
+    • Mark leave → logout + pause scheduler until Clear leave (multi-day safe)
+    • Clear leave → resume scheduler
+    • Or use Pause / Resume without marking leave
 
 
 ================================================================================
@@ -86,17 +90,13 @@ Daily jobs still run on schedule in the background.
 
 Prerequisites (builder machine):
   cd ~/Projects/Ring_Central_Automation
-  bash setup.sh
+  bash packaging/install.sh
 
 Build shareable zip:
-  cd ~/Projects/Ring_Central_Automation
   .venv/bin/python rc_autologin_run.py build-release
 
-  OR:
-  ./scripts/build_zip.sh
-
 Output file:
-  dist/RCAutoLogin-1.0.0-portable.zip
+  dist/RCAutoLogin-1.1.0-portable.zip
 
 Send ONLY this zip file to users (Drive, Slack, email, etc.)
 
@@ -106,7 +106,7 @@ IMPORTANT:
   • Always use build-release command
 
 Verify zip (optional):
-  unzip -l dist/RCAutoLogin-1.0.0-portable.zip | grep -E '\.env|chrome-rcx'
+  unzip -l dist/RCAutoLogin-1.1.0-portable.zip | grep -E '\.env|chrome-rcx'
   (Should return nothing)
 
 
@@ -126,7 +126,6 @@ Verify zip (optional):
   README-FIRST.txt           Quick start for users
   BUILD_AND_SHARE.md         Full documentation
   RCAutoLogin_COMPLETE_GUIDE.txt   This file
-  RCAutoLogin_DEMO_SCRIPT.txt      Demo presenter script
 
 
 ================================================================================
@@ -148,20 +147,21 @@ Each user creates their own .env and Chrome profile when they run install.sh.
 
 STEP 1 — Unzip
   cd ~/Downloads
-  unzip RCAutoLogin-1.0.0-portable.zip
-  cd RCAutoLogin-1.0.0-portable
+  unzip RCAutoLogin-1.1.0-portable.zip
+  cd RCAutoLogin-1.1.0-portable
 
 STEP 2 — Install once
-  chmod +x install.sh launch-gui.sh
+  chmod +x install.sh launch-gui.sh "Launch RCAutoLogin.command"
   ./install.sh
 
-  Requires: Python 3.11–3.13, Google Chrome, internet (first time)
-  (Python 3.14 is not supported yet — Playwright/greenlet fail to install)
+  Requires: Python 3.12 or 3.13, Google Chrome, internet (first time)
+  (Python 3.14 is not supported yet)
 
 STEP 3 — Launch GUI
 
   Mac:
-    Double-click "Launch RCAutoLogin.command"
+    ./launch-gui.sh
+    OR double-click "Launch RCAutoLogin.command"
     OR open RCAutoLogin.app
     (First time: right-click app → Open → Open if security warning)
 
@@ -182,16 +182,17 @@ STEP 5 — Test
 ================================================================================
 
   TODAY
-    • Quick actions: Login, Lunch, Back, Logout
+    • Quick actions: Login, Lunch/Dinner, Break, Back, Logout
     • Today's schedule summary
-    • Start / Stop auto job, Pause, Leave
+    • Start / Stop auto job, Pause / Resume
+    • Mark leave (logout + pause until Clear leave)
 
   SETUP
     • Step 1-2-3 progress bar
-    • Save RingCentral login (one-time per user)
+    • Save RingCentral login (one-time per user; local to this machine)
 
   SCHEDULE
-    • Work hours, lunch, timezone, work days
+    • Work hours, lunch/dinner, timezone, work days
     • Save schedule button
 
   LOG
