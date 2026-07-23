@@ -291,11 +291,9 @@ def get_schedule_jobs(
 def skip_scheduled_job_reason() -> str | None:
     """Return why a scheduled job should be skipped, or None to run."""
     if AUTORUN_PAUSED:
-        return "Automation paused — enable again in menu (option u)"
+        return "Automation paused / on leave — Resume or Clear leave to run jobs again"
     if LEAVE_DATE:
         from datetime import datetime
-
-        import pytz
 
         tz = get_tz()
         today = datetime.now(tz).strftime("%Y-%m-%d")
@@ -312,9 +310,9 @@ def schedule_summary() -> str:
     )
     flags = []
     if AUTORUN_PAUSED:
-        flags.append("Automation: PAUSED (no jobs until resumed)")
+        flags.append("Automation: PAUSED / on leave (no jobs until Resume or Clear leave)")
     if LEAVE_DATE:
-        flags.append(f"Leave date: {LEAVE_DATE} (skip that day; use x to logout)")
+        flags.append(f"Leave since: {LEAVE_DATE}")
     flag_line = ("\n".join(flags) + "\n") if flags else ""
     return (
         f"App:        {APP_NAME}\n"

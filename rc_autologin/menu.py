@@ -204,16 +204,18 @@ def resume_autorun() -> None:
 def mark_leave_today() -> None:
     tz = config.get_tz()
     today = datetime.now(tz).strftime("%Y-%m-%d")
-    _save_and_show({"LEAVE_DATE": today, "AUTORUN_PAUSED": "false"})
+    _save_and_show({"LEAVE_DATE": today, "AUTORUN_PAUSED": "true"})
+    print("Leave marked — scheduler paused until Clear leave.")
     print("Logging out now…")
     try:
         run_action("logout")
     except Exception as exc:
-        print(f"Logout error (leave still marked): {exc}")
+        print(f"Logout error (leave still marked / paused): {exc}")
 
 
 def clear_leave() -> None:
-    _save_and_show({"LEAVE_DATE": ""})
+    _save_and_show({"LEAVE_DATE": "", "AUTORUN_PAUSED": "false"})
+    print("Leave cleared — scheduler resumed.")
 
 
 def run_menu() -> None:
@@ -249,8 +251,8 @@ def run_menu() -> None:
         print("Leave / pause:")
         print("  p) Pause automation")
         print("  u) Resume automation")
-        print("  x) Mark today leave + logout")
-        print("  c) Clear leave date")
+        print("  x) Mark leave (logout + pause until clear)")
+        print("  c) Clear leave (resume scheduler)")
         print("")
         print("Background service:")
         print("  i) Start / install background job (auto on Mac login)")

@@ -163,9 +163,17 @@ class _GuiState:
                 and config.RCX_AUTO_LOGIN_ENABLED
             ),
             "background_note": (
-                "Scheduled jobs run in the background — safe to close this browser tab or press Ctrl+C in the terminal."
-                if scheduler_on
-                else "Scheduler stopped — click Start auto job to enable scheduled runs."
+                "On leave — scheduler paused. Click Clear leave when you return (jobs stay off until then)."
+                if config.AUTORUN_PAUSED and config.LEAVE_DATE
+                else (
+                    "Automation paused — no scheduled jobs until Resume (or Clear leave)."
+                    if config.AUTORUN_PAUSED
+                    else (
+                        "Scheduled jobs run in the background — safe to close this browser tab or press Ctrl+C in the terminal."
+                        if scheduler_on
+                        else "Scheduler stopped — click Start auto job to enable scheduled runs."
+                    )
+                )
             ),
         }
         if include_timezone_options:
@@ -406,13 +414,20 @@ class GuiHandler(BaseHTTPRequestHandler):
         elif op == "resume":
             ok, msg = save_schedule({"AUTORUN_PAUSED": "false", "LEAVE_DATE": ""})
         elif op == "leave":
+            # Pause until Clear leave (multi-day safe) + logout now.
             tz = config.get_tz()
             today = datetime.now(tz).strftime("%Y-%m-%d")
-            ok, msg = save_schedule({"LEAVE_DATE": today, "AUTORUN_PAUSED": "false"})
+            ok, msg = save_schedule({"LEAVE_DATE": today, "AUTORUN_PAUSED": "true"})
             if ok:
-                STATE.run_async("Logout (leave today)", lambda: run_action("logout"))
+                msg = (
+                    "Leave marked — logged out and scheduler paused. "
+                    "Jobs stay off until you click Clear leave."
+                )
+                STATE.run_async("Logout (leave)", lambda: run_action("logout"))
         elif op == "clear_leave":
-            ok, msg = save_schedule({"LEAVE_DATE": ""})
+            ok, msg = save_schedule({"LEAVE_DATE": "", "AUTORUN_PAUSED": "false"})
+            if ok:
+                msg = "Leave cleared — scheduler resumed (jobs run on schedule again)."
         else:
             _send_json(self, 400, {"ok": False, "error": "Unknown automation op"})
             return

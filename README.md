@@ -12,14 +12,20 @@ Automate **RingCX** web agent login, lunch/dinner, break, and logout on a daily 
 | Requirement | Notes |
 |-------------|--------|
 | **Python 3.12+** | Use **3.12 or 3.13** (3.14+ not supported yet) |
-| **Google Chrome** | Or Chromium |
+| **Google Chrome** | Or Chromium (`google-chrome` / `chromium` on Linux) |
 | **Desktop session** | Mac or Linux GUI (not headless-only SSH) |
 
 ```bash
 # macOS
 brew install python@3.12
+
+# Fedora
+sudo dnf install python3.12 google-chrome-stable
+# or: sudo dnf install chromium
 ```
 
+**Fedora / Linux install notes:**  
+If `./install.sh` prints `chrome is already installed` or `BEWARE: … ubuntu20.04-x64`, that is **normal** — setup still completed. RCAutoLogin uses your system Chrome; Playwright may download a Chromium helper with an Ubuntu fallback build.
 ---
 
 ## Install (from release zip)
@@ -87,6 +93,8 @@ bash packaging/install.sh
 1. **Setup** tab → save RingCentral email + password  
 2. **Schedule** tab → work / lunch times → Save  
 3. **Today** tab → **Start auto job**
+
+**Manage RingCX from Today:** Login, Lunch/Dinner, Break, Back, Logout; plus Start/Stop auto job, Pause/Resume, Mark leave (logout + pause until Clear leave), and Close RingCX Chrome.
 
 Credentials stay in local `.env` (never commit that file).
 

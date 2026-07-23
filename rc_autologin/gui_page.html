@@ -314,9 +314,10 @@
           <button id="resume_btn" class="btn btn-secondary" type="button">Resume</button>
         </div>
         <div class="btn-row" style="margin-top:10px">
-          <button id="leave_btn" class="btn btn-secondary" type="button">Mark leave today</button>
+          <button id="leave_btn" class="btn btn-secondary" type="button">Mark leave</button>
           <button id="clear_leave_btn" class="btn btn-secondary" type="button">Clear leave</button>
         </div>
+        <p class="hint" style="margin-top:8px">Mark leave logs out RingCX and pauses the scheduler until Clear leave (works for multi-day leave).</p>
         <div class="btn-row" style="margin-top:10px">
           <button id="close_browser_btn" class="btn btn-secondary" type="button">Close RingCX Chrome</button>
         </div>
@@ -335,7 +336,7 @@
 
       <div class="card">
         <h2 class="card-title">Step 1 — Your login (one-time)</h2>
-        <p class="card-sub">Each user enters their own ID and password once. Saved locally on this Mac only.</p>
+        <p class="card-sub">Each user enters their own ID and password once. Saved locally on the machine.</p>
         <div class="field">
           <label for="rcx_login_id">User ID / email</label>
           <input id="rcx_login_id" type="email" autocomplete="username" placeholder="you@company.com" />
@@ -564,8 +565,9 @@
       if (!s.scheduler_today_active) {
         pills.push('<span class="pill warn"><span class="pill-dot"></span> Not a work day</span>');
       }
-      if (s.paused) pills.push('<span class="pill warn"><span class="pill-dot"></span> Paused</span>');
-      if (s.leave_date) pills.push(`<span class="pill warn">Leave ${s.leave_date}</span>`);
+      if (s.paused) pills.push('<span class="pill warn"><span class="pill-dot"></span> Paused / on leave</span>');
+      if (s.leave_date && !s.paused) pills.push(`<span class="pill warn">Leave ${s.leave_date}</span>`);
+      else if (s.leave_date && s.paused) pills.push(`<span class="pill warn">On leave since ${s.leave_date}</span>`);
       if (s.login_configured) pills.push('<span class="pill ok">Login saved</span>');
       pills.push(`<span class="pill">${s.timezone.split("(")[0].trim()}</span>`);
       $("status_pills").innerHTML = pills.join("");
@@ -728,11 +730,15 @@
     $("pause_btn").addEventListener("click", () => post("/api/automation", { op: "pause" }));
     $("resume_btn").addEventListener("click", () => post("/api/automation", { op: "resume" }));
     $("leave_btn").addEventListener("click", () => {
-      if (confirm("Mark today as leave and logout now?")) {
+      if (confirm("Mark leave? This logs you out of RingCX and pauses the scheduler until you click Clear leave.")) {
         post("/api/automation", { op: "leave" });
       }
     });
-    $("clear_leave_btn").addEventListener("click", () => post("/api/automation", { op: "clear_leave" }));
+    $("clear_leave_btn").addEventListener("click", () => {
+      if (confirm("Clear leave and resume the scheduler?")) {
+        post("/api/automation", { op: "clear_leave" });
+      }
+    });
 
     async function initApp() {
       try {
